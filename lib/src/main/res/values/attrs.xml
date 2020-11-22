@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="AnoLabelView">
+        <attr name="label_horizontalSpace" format="dimension" />
+        <attr name="label_verticalSpace" format="dimension" />
+        <attr name="label_item_background" format="reference|color" />
+        <attr name="label_item_textColor" format="reference|color" />
+        <attr name="label_item_textSize" format="dimension" />
+        <attr name="label_check_type" format="enum">
+            <enum name="none" value="1" />
+            <enum name="single" value="2" />
+            <enum name="single_irrevocably" value="3" />
+            <enum name="multi" value="4" />
+        </attr>
+    </declare-styleable>
+</resources>
