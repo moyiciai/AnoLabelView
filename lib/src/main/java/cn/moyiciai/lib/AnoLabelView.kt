@@ -10,6 +10,7 @@ import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.util.SparseArray
 import android.util.TypedValue
+import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -20,15 +21,27 @@ import androidx.core.view.children
  */
 class AnoLabelView : ViewGroup {
 
+    private val KEY = R.id.ano_label_view_key
+
     var horizontalSpace = 0
     var verticalSpace = 0
     var itemBackground: Drawable? = null
     var itemTextColor: ColorStateList? = null
     var itemTextSize: Int = 30
     var checkType: CheckType = CheckType.NONE
-    var onCheckChangeListener: OnCheckedChangeListener? = null
 
     private val childRectCache: SparseArray<Rect> = SparseArray()
+
+    private var onCheckChangeListener: OnCheckedChangeListener? = null
+
+    private val views: ArrayList<TextView> = arrayListOf()
+
+    private val checkedView: LinkedHashSet<TextView> = linkedSetOf()
+
+    /**
+     * 单选时被选中的item的位置
+     */
+    private var singleCheckedPosition: Int = -1
 
     constructor(context: Context) : super(context)
 
@@ -192,18 +205,15 @@ class AnoLabelView : ViewGroup {
         NONE(1),
         // 单选
         SINGLE(2),
-        // 单选，不可反选
-        SINGLE_IRREVOCABLY(3),
         // 多选
-        MULTI(4);
+        MULTI(3);
 
         companion object {
             fun get(value: Int): CheckType {
                 return when (value) {
                     1 -> NONE
                     2 -> SINGLE
-                    3 -> SINGLE_IRREVOCABLY
-                    4 -> MULTI
+                    3 -> MULTI
                     else -> NONE
                 }
             }
@@ -223,19 +233,104 @@ class AnoLabelView : ViewGroup {
         return view
     }
 
+    private val mOnClickListener: OnClickListener = OnClickListener { view ->
+        if (view !is TextView)
+            return@OnClickListener
+
+        val position = views.indexOf(view)
+
+        if (checkType == CheckType.SINGLE) {
+            if (singleCheckedPosition >= 0) {
+                if (view == getItemView(singleCheckedPosition)) {
+                    setViewChecked(view, false)
+                } else {
+                    val tmp = getItemView(singleCheckedPosition)
+                    setViewChecked(tmp, false)
+                    onCheckChangeListener?.onCheckedChanged(tmp, getDataByTag(tmp), false)
+                    setViewChecked(view, true)
+                    singleCheckedPosition = position
+                }
+            } else {
+                setViewChecked(view, true)
+                singleCheckedPosition = position
+            }
+        } else if (checkType == CheckType.MULTI) {
+            toggleViewChecked(view)
+        }
+
+        onCheckChangeListener?.onCheckedChanged(view, getDataByTag(view), view.isSelected)
+    }
+
+    private fun getDataByTag(view: TextView): Any = view.getTag(KEY)
+
+    private fun setDataByTag(view: TextView, data: Any) {
+        view.setTag(KEY, data)
+    }
+
+    private fun setViewChecked(view: TextView, isChecked: Boolean) {
+        view.isSelected = isChecked
+        if (isChecked) checkedView.add(view)
+        else checkedView.remove(view)
+    }
+
+    private fun toggleViewChecked(view: TextView) {
+        setViewChecked(view, !view.isSelected)
+    }
+
+    private fun ensureItemViewClickable(view: View) {
+        val isClickable = checkType != CheckType.NONE
+        view.setOnClickListener(if (isClickable) mOnClickListener else null)
+        view.isClickable = isClickable
+    }
+
+    private fun <T> addLabelItem(data: T, position: Int, text: CharSequence) {
+        val view = newChildView()
+        view.text = text
+        setDataByTag(view, data as Any)
+
+        ensureItemViewClickable(view)
+
+        addView(view)
+        views.add(position, view)
+    }
+
+    private fun getItemView(position: Int): TextView = views.get(position)
+
     /**
      * 设置数据
      */
     fun setData(data: List<String>) {
-        for (datum in data) {
-            val childView = newChildView()
-            childView.text = datum
-            addView(childView)
+        setData(data, object : TextProvider<String> {
+            override fun getText(data: String, position: Int) = data
+        })
+    }
+
+    /**
+     * 设置数据
+     */
+    fun <T> setData(data: List<T>, textProvider: TextProvider<T>) {
+        views.clear()
+        removeAllViews()
+
+        for (indexed in data.withIndex()) {
+            addLabelItem(
+                indexed.value,
+                indexed.index,
+                textProvider.getText(indexed.value, indexed.index)
+            )
         }
         requestLayout()
     }
 
+    interface TextProvider<T> {
+        fun getText(data: T, position: Int): CharSequence
+    }
+
     interface OnCheckedChangeListener {
-        fun onCheckedChanged(labelView: TextView, isChecked: Boolean)
+        fun onCheckedChanged(view: TextView, data: Any, isChecked: Boolean)
+    }
+
+    fun setOnCheckedChangeListener(listener: OnCheckedChangeListener) {
+        onCheckChangeListener = listener
     }
 }

@@ -9,8 +9,7 @@
         <attr name="label_check_type" format="enum">
             <enum name="none" value="1" />
             <enum name="single" value="2" />
-            <enum name="single_irrevocably" value="3" />
-            <enum name="multi" value="4" />
+            <enum name="multi" value="3" />
         </attr>
     </declare-styleable>
 </resources>
