@@ -3,6 +3,7 @@
     <declare-styleable name="AnoLabelView">
         <attr name="label_horizontalSpace" format="dimension" />
         <attr name="label_verticalSpace" format="dimension" />
+        <attr name="label_maxLines" format="integer" />
         <attr name="label_item_background" format="reference|color" />
         <attr name="label_item_textColor" format="reference|color" />
         <attr name="label_item_textSize" format="dimension" />

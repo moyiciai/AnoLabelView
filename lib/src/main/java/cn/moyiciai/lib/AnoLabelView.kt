@@ -137,6 +137,9 @@ class AnoLabelView : ViewGroup {
                 R.styleable.AnoLabelView_label_check_maxNum -> {
                     maxCheckedCount = ta.getInt(attr, 1)
                 }
+                R.styleable.AnoLabelView_label_maxLines -> {
+                    maxLines = ta.getInt(attr, -1)
+                }
             }
         }
         ta.recycle()
@@ -157,6 +160,8 @@ class AnoLabelView : ViewGroup {
         val maxWidth = MeasureSpec.getSize(widthMeasureSpec) - paddingLeft - paddingRight
         // 新的一行
         var newRow = true
+        // 记录当前行数
+        var lines = 1
 
         var l: Int
 
@@ -173,10 +178,20 @@ class AnoLabelView : ViewGroup {
             // 需要换行的情况
             if (childView.measuredWidth + curRowWidth >= maxWidth) {
                 maxRowWidth = curRowWidth.coerceAtLeast(maxRowWidth)
-                overallHeight += (verticalSpace + curRowMaxHeight)
+                if (lines == maxLines) { // 达到最大行数限制时结束测量
+                    overallHeight += curRowMaxHeight
+                    setMeasuredDimension(
+                        measureWidth(widthMeasureSpec, maxRowWidth),
+                        measureHeight(heightMeasureSpec, overallHeight)
+                    )
+                    return
+                } else {
+                    overallHeight += (verticalSpace + curRowMaxHeight)
+                }
                 curRowWidth = 0
                 curRowMaxHeight = 0
                 l = 0
+                lines++
             }
 
             curRowMaxHeight = curRowMaxHeight.coerceAtLeast(childView.measuredHeight)
@@ -200,9 +215,9 @@ class AnoLabelView : ViewGroup {
     }
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
-        for (i in children.withIndex()) {
-            val rect = childRectCache[i.index]
-            i.value.layout(rect.left, rect.top, rect.right, rect.bottom)
+        for (i in 0 until childRectCache.size()) {
+            val rect = childRectCache[i]
+            getChildAt(i).layout(rect.left, rect.top, rect.right, rect.bottom)
         }
     }
 
