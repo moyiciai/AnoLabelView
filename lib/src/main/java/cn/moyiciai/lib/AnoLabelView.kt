@@ -29,14 +29,19 @@ class AnoLabelView : ViewGroup {
     var itemTextColor: ColorStateList? = null
     var itemTextSize: Int = 30
     var checkType: CheckType = CheckType.NONE
+    var maxCheckedCount: Int = 1
 
     private val childRectCache: SparseArray<Rect> = SparseArray()
 
     private var onCheckChangeListener: OnCheckedChangeListener? = null
 
+    private var onLabelClickListener: OnLabelClickListener? = null
+
+    private var onCheckedChangeInterceptor: OnCheckedChangeInterceptor? = null
+
     private val views: ArrayList<TextView> = arrayListOf()
 
-    private val checkedView: LinkedHashSet<TextView> = linkedSetOf()
+    private val checkedViews: LinkedHashSet<TextView> = linkedSetOf()
 
     /**
      * 单选时被选中的item的位置
@@ -87,6 +92,9 @@ class AnoLabelView : ViewGroup {
                 R.styleable.AnoLabelView_label_check_type -> {
                     val value = ta.getInt(attr, CheckType.NONE.value)
                     checkType = CheckType.get(value)
+                }
+                R.styleable.AnoLabelView_label_check_maxNum -> {
+                    maxCheckedCount = ta.getInt(attr, 1)
                 }
             }
         }
@@ -203,8 +211,10 @@ class AnoLabelView : ViewGroup {
     enum class CheckType(val value: Int) {
         // 不可选
         NONE(1),
+
         // 单选
         SINGLE(2),
+
         // 多选
         MULTI(3);
 
@@ -223,16 +233,11 @@ class AnoLabelView : ViewGroup {
     /**
      * 新建子View
      */
-    private fun newChildView(): TextView {
-        val view = TextView(context)
-        view.run {
-            background = itemBackground
-            setTextColor(itemTextColor)
-            setTextSize(TypedValue.COMPLEX_UNIT_PX, itemTextSize.toFloat())
-        }
-        return view
-    }
+    private fun newChildView(): TextView = TextView(context)
 
+    /**
+     * 标签点击监听
+     */
     private val mOnClickListener: OnClickListener = OnClickListener { view ->
         if (view !is TextView)
             return@OnClickListener
@@ -255,9 +260,14 @@ class AnoLabelView : ViewGroup {
                 singleCheckedPosition = position
             }
         } else if (checkType == CheckType.MULTI) {
+            if (view.isSelected.not() && checkedViews.size == maxCheckedCount) {
+                onLabelClickListener?.onLabelClick(view, getDataByTag(view), position)
+                return@OnClickListener
+            }
             toggleViewChecked(view)
         }
 
+        onLabelClickListener?.onLabelClick(view, getDataByTag(view), position)
         onCheckChangeListener?.onCheckedChanged(view, getDataByTag(view), view.isSelected)
     }
 
@@ -269,8 +279,8 @@ class AnoLabelView : ViewGroup {
 
     private fun setViewChecked(view: TextView, isChecked: Boolean) {
         view.isSelected = isChecked
-        if (isChecked) checkedView.add(view)
-        else checkedView.remove(view)
+        if (isChecked) checkedViews.add(view)
+        else checkedViews.remove(view)
     }
 
     private fun toggleViewChecked(view: TextView) {
@@ -285,7 +295,12 @@ class AnoLabelView : ViewGroup {
 
     private fun <T> addLabelItem(data: T, position: Int, text: CharSequence) {
         val view = newChildView()
-        view.text = text
+        view.run {
+            this.text = text
+            background = itemBackground?.constantState?.newDrawable()
+            setTextColor(itemTextColor)
+            setTextSize(TypedValue.COMPLEX_UNIT_PX, itemTextSize.toFloat())
+        }
         setDataByTag(view, data as Any)
 
         ensureItemViewClickable(view)
@@ -295,6 +310,43 @@ class AnoLabelView : ViewGroup {
     }
 
     private fun getItemView(position: Int): TextView = views.get(position)
+
+    interface TextProvider<T> {
+        fun getText(data: T, position: Int): CharSequence
+    }
+
+    /**
+     * 点击监听
+     */
+    interface OnLabelClickListener {
+        fun onLabelClick(view: TextView, data: Any, position: Int)
+    }
+
+    fun setOnLabelClickListener(listener: OnLabelClickListener) {
+        onLabelClickListener = listener
+    }
+
+    /**
+     * 状态改变监听
+     */
+    interface OnCheckedChangeListener {
+        fun onCheckedChanged(view: TextView, data: Any, isChecked: Boolean)
+    }
+
+    fun setOnCheckedChangeListener(listener: OnCheckedChangeListener) {
+        onCheckChangeListener = listener
+    }
+
+    /**
+     * 状态改变监听拦截
+     */
+    interface OnCheckedChangeInterceptor {
+        fun onCheckedChangeIntercept()
+    }
+
+    fun setOnCheckedChangeInterceptor(interceptor: OnCheckedChangeInterceptor) {
+        onCheckedChangeInterceptor = interceptor
+    }
 
     /**
      * 设置数据
@@ -322,15 +374,13 @@ class AnoLabelView : ViewGroup {
         requestLayout()
     }
 
-    interface TextProvider<T> {
-        fun getText(data: T, position: Int): CharSequence
-    }
-
-    interface OnCheckedChangeListener {
-        fun onCheckedChanged(view: TextView, data: Any, isChecked: Boolean)
-    }
-
-    fun setOnCheckedChangeListener(listener: OnCheckedChangeListener) {
-        onCheckChangeListener = listener
+    /**
+     * 获取选中的数据
+     */
+    @Suppress("UNCHECKED_CAST")
+    fun <T> getCheckedData(): List<T> {
+        return checkedViews.map {
+            getDataByTag(it) as T
+        }
     }
 }
