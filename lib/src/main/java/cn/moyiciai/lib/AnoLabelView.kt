@@ -23,14 +23,49 @@ class AnoLabelView : ViewGroup {
 
     private val KEY = R.id.ano_label_view_key
 
+    /**
+     * 标签间的横向间隔
+     */
     var horizontalSpace = 0
+
+    /**
+     * 标签间的纵向间隔
+     */
     var verticalSpace = 0
+
+    /**
+     * 标签背景
+     */
     var itemBackground: Drawable? = null
+
+    /**
+     * 标签的文字颜色
+     */
     var itemTextColor: ColorStateList? = null
+
+    /**
+     * 标签的文字大小
+     */
     var itemTextSize: Int = 30
+
+    /**
+     * @see CheckType
+     */
     var checkType: CheckType = CheckType.NONE
+
+    /**
+     * 最大选择数
+     */
     var maxCheckedCount: Int = 1
 
+    /**
+     * 最大显示行数，为负数则不限制
+     */
+    var maxLines: Int = -1
+
+    /**
+     * 记录子控件位置
+     */
     private val childRectCache: SparseArray<Rect> = SparseArray()
 
     private var onCheckChangeListener: OnCheckedChangeListener? = null
@@ -39,8 +74,14 @@ class AnoLabelView : ViewGroup {
 
     private var onCheckedChangeInterceptor: OnCheckedChangeInterceptor? = null
 
+    /**
+     * 保存所有的子控件
+     */
     private val views: ArrayList<TextView> = arrayListOf()
 
+    /**
+     * 保存所有选中状态的子控件
+     */
     private val checkedViews: LinkedHashSet<TextView> = linkedSetOf()
 
     /**
@@ -287,12 +328,18 @@ class AnoLabelView : ViewGroup {
         setViewChecked(view, !view.isSelected)
     }
 
+    /**
+     * 确保view响应点击事件
+     */
     private fun ensureItemViewClickable(view: View) {
         val isClickable = checkType != CheckType.NONE
         view.setOnClickListener(if (isClickable) mOnClickListener else null)
         view.isClickable = isClickable
     }
 
+    /**
+     * 添加标签
+     */
     private fun <T> addLabelItem(data: T, position: Int, text: CharSequence) {
         val view = newChildView()
         view.run {
@@ -311,6 +358,10 @@ class AnoLabelView : ViewGroup {
 
     private fun getItemView(position: Int): TextView = views.get(position)
 
+    /**
+     * AnoLabelView可以存储任何类型的数据，
+     * 非String类型数据的话使用TextProvider提供标签显示的文字
+     */
     interface TextProvider<T> {
         fun getText(data: T, position: Int): CharSequence
     }
