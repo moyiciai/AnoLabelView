@@ -133,7 +133,90 @@
         android:id="@+id/btn_show_label"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
         android:text="显示标签"
         tools:ignore="HardcodedText" />
+
+    <LinearLayout
+        style="?android:attr/buttonBarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp">
+
+        <Button
+            android:id="@+id/btn_new_first"
+            style="?android:attr/buttonBarStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="添加头部"
+            android:textSize="12sp"
+            tools:ignore="HardcodedText" />
+
+        <Button
+            android:id="@+id/btn_new_mid"
+            style="?android:attr/buttonBarStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:text="添加中间"
+            android:textSize="12sp"
+            tools:ignore="HardcodedText" />
+
+        <Button
+            android:id="@+id/btn_new_last"
+            style="?android:attr/buttonBarStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:text="添加尾部"
+            android:textSize="12sp"
+            tools:ignore="HardcodedText" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        style="?android:attr/buttonBarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp">
+
+        <Button
+            android:id="@+id/btn_remove_first"
+            style="?android:attr/buttonBarStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="移除头部"
+            android:textSize="12sp"
+            tools:ignore="HardcodedText" />
+
+        <Button
+            android:id="@+id/btn_remove_mid"
+            style="?android:attr/buttonBarStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:text="移除中间"
+            android:textSize="12sp"
+            tools:ignore="HardcodedText" />
+
+        <Button
+            android:id="@+id/btn_remove_last"
+            style="?android:attr/buttonBarStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:text="移除尾部"
+            android:textSize="12sp"
+            tools:ignore="HardcodedText" />
+    </LinearLayout>
 </LinearLayout>

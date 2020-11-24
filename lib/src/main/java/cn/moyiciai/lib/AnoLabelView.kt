@@ -486,8 +486,17 @@ class AnoLabelView : ViewGroup {
 
         ensureItemViewClickable(view)
 
-        addView(view)
         views.add(position, view)
+        addView(view, position)
+    }
+
+    /**
+     * 移除标签
+     */
+    private fun removeLabelItem(position: Int) {
+        if (position < 0 || position >= views.size) return
+        views.removeAt(position)
+        removeViewAt(position)
     }
 
     /**
@@ -574,7 +583,41 @@ class AnoLabelView : ViewGroup {
                 textProvider.getText(indexed.value, indexed.index)
             )
         }
-        requestLayout()
+    }
+
+    /**
+     * 添加数据
+     */
+    fun addData(data: String) {
+        addLabelItem(data, views.size, data)
+    }
+
+    /**
+     * 添加数据
+     */
+    fun addData(position: Int, data: String) {
+        addLabelItem(data, position, data)
+    }
+
+    /**
+     * 添加数据
+     */
+    fun <T> addData(data: T, textProvider: TextProvider<T>) {
+        addLabelItem(data, views.size, textProvider.getText(data, views.size))
+    }
+
+    /**
+     * 添加数据
+     */
+    fun <T> addData(position: Int, data: T, textProvider: TextProvider<T>) {
+        addLabelItem(data, position, textProvider.getText(data, position))
+    }
+
+    /**
+     * 移除数据
+     */
+    fun removeData(position: Int) {
+        removeLabelItem(position)
     }
 
     /**

@@ -8,12 +8,15 @@ import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.size
 import cn.moyiciai.lib.AnoLabelView
 
 @SuppressLint("SetTextI18n")
 class MainActivity : AppCompatActivity() {
 
     private lateinit var labelView: AnoLabelView
+
+    private var count = 20
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,7 +28,7 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.btn_show_label).setOnClickListener {
             val data = mutableListOf<String>()
-            for (i in 0..20) {
+            for (i in 0 until count) {
                 if (i == 5) {
                     data.add("不可点击")
                 } else {
@@ -131,5 +134,34 @@ class MainActivity : AppCompatActivity() {
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
+
+        findViewById<Button>(R.id.btn_new_first).setOnClickListener {
+            labelView.addData(0, "item $count")
+            count++
+        }
+
+        findViewById<Button>(R.id.btn_new_mid).setOnClickListener {
+            val pos = (labelView.size / 2).coerceAtLeast(0)
+            labelView.addData(pos, "item $count")
+            count++
+        }
+
+        findViewById<Button>(R.id.btn_new_last).setOnClickListener {
+            labelView.addData(labelView.size, "item $count")
+            count++
+        }
+
+        findViewById<Button>(R.id.btn_remove_first).setOnClickListener {
+            labelView.removeData(0)
+        }
+
+        findViewById<Button>(R.id.btn_remove_mid).setOnClickListener {
+            val pos = (labelView.size / 2).coerceAtLeast(0)
+            labelView.removeData(pos)
+        }
+
+        findViewById<Button>(R.id.btn_remove_last).setOnClickListener {
+            labelView.removeData(labelView.size - 1)
+        }
     }
 }
