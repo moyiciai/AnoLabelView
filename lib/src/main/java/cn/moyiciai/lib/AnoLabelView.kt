@@ -27,11 +27,19 @@ class AnoLabelView : ViewGroup {
      * 标签间的横向间隔
      */
     var horizontalSpace = 0
+        set(value) {
+            field = value
+            requestLayout()
+        }
 
     /**
      * 标签间的纵向间隔
      */
     var verticalSpace = 0
+        set(value) {
+            field = value
+            requestLayout()
+        }
 
     /**
      * 标签背景
@@ -47,21 +55,56 @@ class AnoLabelView : ViewGroup {
      * 标签的文字大小
      */
     var itemTextSize: Int = 30
+        set(value) {
+            field = value
+            views.forEach { it.setTextSize(TypedValue.COMPLEX_UNIT_PX, value.toFloat()) }
+        }
 
     /**
+     * 修改为不可选时会清空所有的已选项；
+     * 单选改为多选时，如果有标签被选中并且maxCheckedCount小于1，那么maxCheckedCount会被置为1；
+     * 多选改为单选时，会清空所有的已选项。
+     *
      * @see CheckType
      */
     var checkType: CheckType = CheckType.NONE
+        set(value) {
+            if (field == value) return
+            when (field) {
+                CheckType.SINGLE -> {
+                    if (field == CheckType.NONE) {
+                        checkedViews.forEach { setItemChecked(it, false) }
+                    } else if (field == CheckType.MULTI) {
+                        maxCheckedCount = maxCheckedCount.coerceAtLeast(1)
+                    }
+                }
+                CheckType.MULTI -> {
+                    checkedViews.forEach { setItemChecked(it, false) }
+                }
+                else -> print("")
+            }
+            field = value
+        }
 
     /**
-     * 最大选择数
+     * 最大选择数；
+     * 在多选模式下，如果设置的最大选择数小于已选数量，设置将不会有效。
      */
     var maxCheckedCount: Int = 1
+        set(value) {
+            if (field == value) return
+            if (checkType == CheckType.MULTI && value < checkedViews.size) return
+            field = value
+        }
 
     /**
-     * 最大显示行数，为负数则不限制
+     * 最大显示行数，为负数或0则不限制
      */
     var maxLines: Int = -1
+        set(value) {
+            field = value
+            requestLayout()
+        }
 
     /**
      * 记录子控件位置
@@ -147,6 +190,7 @@ class AnoLabelView : ViewGroup {
 
     @SuppressLint("DrawAllocation")
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        childRectCache.clear()
 
         // 记录整体高度
         var overallHeight = 0
@@ -215,9 +259,15 @@ class AnoLabelView : ViewGroup {
     }
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
-        for (i in 0 until childRectCache.size()) {
-            val rect = childRectCache[i]
-            getChildAt(i).layout(rect.left, rect.top, rect.right, rect.bottom)
+        for (indexed in children.withIndex()) {
+            val i = indexed.index
+            if (i < childRectCache.size()) {
+                val rect = childRectCache[i]
+                getChildAt(i).layout(rect.left, rect.top, rect.right, rect.bottom)
+            } else {
+                // 通过改变横向间隔导致最大行数超过限制，多余出来的View可能已经被布局过，所以此处要把它们的位置清零
+                getChildAt(i).layout(0, 0, 0, 0)
+            }
         }
     }
 
@@ -302,17 +352,17 @@ class AnoLabelView : ViewGroup {
 
         if (checkType == CheckType.SINGLE) {
             if (singleCheckedPosition >= 0) {
-                if (view == getItemView(singleCheckedPosition)) {
-                    setViewChecked(view, false)
+                if (view == views[singleCheckedPosition]) {
+                    setItemChecked(view, false)
                 } else {
-                    val tmp = getItemView(singleCheckedPosition)
-                    setViewChecked(tmp, false)
+                    val tmp = views[singleCheckedPosition]
+                    setItemChecked(tmp, false)
                     onCheckChangeListener?.onCheckedChanged(tmp, getDataByTag(tmp), false)
-                    setViewChecked(view, true)
+                    setItemChecked(view, true)
                     singleCheckedPosition = position
                 }
             } else {
-                setViewChecked(view, true)
+                setItemChecked(view, true)
                 singleCheckedPosition = position
             }
         } else if (checkType == CheckType.MULTI) {
@@ -333,14 +383,27 @@ class AnoLabelView : ViewGroup {
         view.setTag(KEY, data)
     }
 
-    private fun setViewChecked(view: TextView, isChecked: Boolean) {
+    /**
+     * 改变item的选中状态都应该调用该方法
+     */
+    private fun setItemChecked(view: TextView, isChecked: Boolean) {
+        val intercept = onCheckedChangeInterceptor?.onCheckedChangeIntercept(
+            view,
+            getDataByTag(view),
+            views.indexOf(view),
+            view.isSelected,
+            isChecked
+        ) ?: false
+
+        if (intercept) return
+
         view.isSelected = isChecked
         if (isChecked) checkedViews.add(view)
         else checkedViews.remove(view)
     }
 
     private fun toggleViewChecked(view: TextView) {
-        setViewChecked(view, !view.isSelected)
+        setItemChecked(view, !view.isSelected)
     }
 
     /**
@@ -370,8 +433,6 @@ class AnoLabelView : ViewGroup {
         addView(view)
         views.add(position, view)
     }
-
-    private fun getItemView(position: Int): TextView = views.get(position)
 
     /**
      * AnoLabelView可以存储任何类型的数据，
@@ -407,7 +468,13 @@ class AnoLabelView : ViewGroup {
      * 状态改变监听拦截
      */
     interface OnCheckedChangeInterceptor {
-        fun onCheckedChangeIntercept()
+        fun onCheckedChangeIntercept(
+            view: TextView,
+            data: Any,
+            position: Int,
+            oldChecked: Boolean,
+            newChecked: Boolean
+        ): Boolean
     }
 
     fun setOnCheckedChangeInterceptor(interceptor: OnCheckedChangeInterceptor) {
@@ -449,4 +516,14 @@ class AnoLabelView : ViewGroup {
             getDataByTag(it) as T
         }
     }
+
+    /**
+     * 是否已达到最大选择数
+     */
+    fun isCheckedMax(): Boolean = views.size == maxCheckedCount
+
+    /**
+     * 获取已选标签的数量
+     */
+    fun getCheckedSize(): Int = checkedViews.size
 }
