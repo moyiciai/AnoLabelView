@@ -107,6 +107,42 @@ class AnoLabelView : ViewGroup {
         }
 
     /**
+     * 标签左内边距
+     */
+    var itemPaddingLeft: Int = 0
+        set(value) {
+            field = value
+            setupItemPadding()
+        }
+
+    /**
+     * 标签上内边距
+     */
+    var itemPaddingTop: Int = 0
+        set(value) {
+            field = value
+            setupItemPadding()
+        }
+
+    /**
+     * 标签右内边距
+     */
+    var itemPaddingRight: Int = 0
+        set(value) {
+            field = value
+            setupItemPadding()
+        }
+
+    /**
+     * 标签下内边距
+     */
+    var itemPaddingBottom: Int = 0
+        set(value) {
+            field = value
+            setupItemPadding()
+        }
+
+    /**
      * 记录子控件位置
      */
     private val childRectCache: SparseArray<Rect> = SparseArray()
@@ -182,6 +218,25 @@ class AnoLabelView : ViewGroup {
                 }
                 R.styleable.AnoLabelView_label_maxLines -> {
                     maxLines = ta.getInt(attr, -1)
+                }
+                R.styleable.AnoLabelView_label_item_padding -> {
+                    val padding = ta.getDimensionPixelSize(attr, 0)
+                    itemPaddingLeft = padding
+                    itemPaddingTop = padding
+                    itemPaddingRight = padding
+                    itemPaddingBottom = padding
+                }
+                R.styleable.AnoLabelView_label_item_paddingLeft -> {
+                    itemPaddingLeft = ta.getDimensionPixelSize(attr, 0)
+                }
+                R.styleable.AnoLabelView_label_item_paddingTop -> {
+                    itemPaddingTop = ta.getDimensionPixelSize(attr, 0)
+                }
+                R.styleable.AnoLabelView_label_item_paddingRight -> {
+                    itemPaddingRight = ta.getDimensionPixelSize(attr, 0)
+                }
+                R.styleable.AnoLabelView_label_item_paddingBottom -> {
+                    itemPaddingBottom = ta.getDimensionPixelSize(attr, 0)
                 }
             }
         }
@@ -425,6 +480,7 @@ class AnoLabelView : ViewGroup {
             background = itemBackground?.constantState?.newDrawable()
             setTextColor(itemTextColor)
             setTextSize(TypedValue.COMPLEX_UNIT_PX, itemTextSize.toFloat())
+            setPadding(itemPaddingLeft, itemPaddingTop, itemPaddingRight, itemPaddingBottom)
         }
         setDataByTag(view, data as Any)
 
@@ -432,6 +488,20 @@ class AnoLabelView : ViewGroup {
 
         addView(view)
         views.add(position, view)
+    }
+
+    /**
+     * 设置标签内边距，设置itemPadding*属性时调用
+     */
+    private fun setupItemPadding() {
+        views.forEach {
+            it.setPadding(
+                itemPaddingLeft,
+                itemPaddingTop,
+                itemPaddingRight,
+                itemPaddingBottom
+            )
+        }
     }
 
     /**

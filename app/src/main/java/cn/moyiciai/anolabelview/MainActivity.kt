@@ -14,14 +14,12 @@ import cn.moyiciai.lib.AnoLabelView
 class MainActivity : AppCompatActivity() {
 
     private lateinit var labelView: AnoLabelView
-    private lateinit var tvInfo: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         labelView = findViewById(R.id.label_view)
-        tvInfo = findViewById(R.id.tv_info)
 
         initControlView()
 
@@ -67,11 +65,6 @@ class MainActivity : AppCompatActivity() {
                 })
             }
         }
-
-        findViewById<Button>(R.id.btn_get_result).setOnClickListener {
-            val data = labelView.getCheckedData<String>()
-            tvInfo.text = "${data.size}"
-        }
     }
 
     private fun initControlView() {
@@ -79,6 +72,7 @@ class MainActivity : AppCompatActivity() {
         val tvVSpace = findViewById<TextView>(R.id.tv_vertical_space)
         val tvTextSize = findViewById<TextView>(R.id.tv_text_size)
         val tvMaxLines = findViewById<TextView>(R.id.tv_max_lines)
+        val tvPadding = findViewById<TextView>(R.id.tv_padding)
 
         findViewById<SeekBar>(R.id.seekBar_horizontal_space).setOnSeekBarChangeListener(object :
             SeekBar.OnSeekBarChangeListener {
@@ -124,5 +118,18 @@ class MainActivity : AppCompatActivity() {
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
 
+        findViewById<SeekBar>(R.id.seekBar_padding).setOnSeekBarChangeListener(object :
+            SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                labelView.itemPaddingLeft = progress
+                labelView.itemPaddingTop = progress
+                labelView.itemPaddingRight = progress
+                labelView.itemPaddingBottom = progress
+                tvPadding.text = "内边距（$progress）"
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
     }
 }
