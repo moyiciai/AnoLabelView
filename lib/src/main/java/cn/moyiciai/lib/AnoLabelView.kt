@@ -154,11 +154,12 @@ class AnoLabelView<T> : ViewGroup {
      */
     private val childRectCache: SparseArray<Rect> = SparseArray()
 
-    private var onCheckChangeListener: OnCheckedChangeListener<T>? = null
+    private var onCheckChangeListener: ((TextView, T, Boolean) -> Unit)? = null
 
-    private var onLabelClickListener: OnLabelClickListener<T>? = null
+    private var onLabelClickListener: ((TextView, T, Int) -> Unit)? = null
 
-    private var onCheckedChangeInterceptor: OnCheckedChangeInterceptor<T>? = null
+    private var onCheckedChangeInterceptor: ((TextView, T, Int, Boolean, Boolean) -> Boolean)?
+            = null
 
     /**
      * 保存所有的子控件
@@ -421,7 +422,7 @@ class AnoLabelView<T> : ViewGroup {
                 } else {
                     val tmp = views[singleCheckedPosition]
                     setItemChecked(tmp, false)
-                    onCheckChangeListener?.onCheckedChanged(tmp, getDataByTag(tmp), false)
+                    onCheckChangeListener?.invoke(tmp, getDataByTag(tmp), false)
                     setItemChecked(view, true)
                     singleCheckedPosition = position
                 }
@@ -431,14 +432,13 @@ class AnoLabelView<T> : ViewGroup {
             }
         } else if (checkType == CheckType.MULTI) {
             if (view.isSelected.not() && checkedViews.size == maxCheckedCount) {
-                onLabelClickListener?.onLabelClick(view, getDataByTag(view), position)
+                onLabelClickListener?.invoke(view, getDataByTag(view), position)
                 return@OnClickListener
             }
             toggleViewChecked(view)
         }
-
-        onLabelClickListener?.onLabelClick(view, getDataByTag(view), position)
-        onCheckChangeListener?.onCheckedChanged(view, getDataByTag(view), view.isSelected)
+        onLabelClickListener?.invoke(view, getDataByTag(view), position)
+        onCheckChangeListener?.invoke(view, getDataByTag(view), view.isSelected)
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -456,7 +456,7 @@ class AnoLabelView<T> : ViewGroup {
      * 改变item的选中状态都应该调用该方法
      */
     private fun setItemChecked(view: TextView, isChecked: Boolean) {
-        val intercept = onCheckedChangeInterceptor?.onCheckedChangeIntercept(
+        val intercept = onCheckedChangeInterceptor?.invoke(
             view,
             getDataByTag(view),
             views.indexOf(view),
@@ -535,42 +535,23 @@ class AnoLabelView<T> : ViewGroup {
         fun getText(data: T): CharSequence
     }
 
-    /**
-     * 点击监听
-     */
-    interface OnLabelClickListener<T> {
-        fun onLabelClick(view: TextView, data: T, position: Int)
-    }
-
-    fun setOnLabelClickListener(listener: OnLabelClickListener<T>) {
+    fun setOnLabelClickListener(listener: (view: TextView, data: T, position: Int) -> Unit) {
         onLabelClickListener = listener
     }
 
-    /**
-     * 状态改变监听
-     */
-    interface OnCheckedChangeListener<T> {
-        fun onCheckedChanged(view: TextView, data: T, isChecked: Boolean)
-    }
-
-    fun setOnCheckedChangeListener(listener: OnCheckedChangeListener<T>) {
+    fun setOnCheckedChangeListener(listener: (view: TextView, data: T, isChecked: Boolean) -> Unit) {
         onCheckChangeListener = listener
     }
 
-    /**
-     * 状态改变监听拦截
-     */
-    interface OnCheckedChangeInterceptor<T> {
-        fun onCheckedChangeIntercept(
+    fun setOnCheckedChangeInterceptor(
+        interceptor: (
             view: TextView,
             data: T,
             position: Int,
             oldChecked: Boolean,
             newChecked: Boolean
-        ): Boolean
-    }
-
-    fun setOnCheckedChangeInterceptor(interceptor: OnCheckedChangeInterceptor<T>) {
+        ) -> Boolean
+    ) {
         onCheckedChangeInterceptor = interceptor
     }
 

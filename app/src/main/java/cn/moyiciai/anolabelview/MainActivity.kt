@@ -41,39 +41,22 @@ class MainActivity : AppCompatActivity() {
 
             labelView.run {
                 setData(data)
-                setOnCheckedChangeListener(object : AnoLabelView.OnCheckedChangeListener<String> {
-                    override fun onCheckedChanged(
-                        view: TextView,
-                        data: String,
-                        isChecked: Boolean
-                    ) {
-                        Log.d("dx", "${data}, isChecked=$isChecked")
+                setOnCheckedChangeListener { view, data, isChecked ->
+                    Log.d("dx", "${data}, isChecked=$isChecked")
+                }
+                setOnLabelClickListener { view, data, position ->
+                    if (position == 5) {
+                        Toast.makeText(
+                            this@MainActivity,
+                            "当前标签被设置为不可点击",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
-                })
-                setOnLabelClickListener(object : AnoLabelView.OnLabelClickListener<String> {
-                    override fun onLabelClick(view: TextView, data: String, position: Int) {
-                        if (position == 5) {
-                            Toast.makeText(
-                                this@MainActivity,
-                                "当前标签被设置为不可点击",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                        Log.d("dx", "onClick=$data")
-                    }
-                })
-                setOnCheckedChangeInterceptor(object :
-                    AnoLabelView.OnCheckedChangeInterceptor<String> {
-                    override fun onCheckedChangeIntercept(
-                        view: TextView,
-                        data: String,
-                        position: Int,
-                        oldChecked: Boolean,
-                        newChecked: Boolean
-                    ): Boolean {
-                        return position == 5
-                    }
-                })
+                    Log.d("dx", "onClick=$data")
+                }
+                setOnCheckedChangeInterceptor { view, data, position, oldChecked, newChecked ->
+                    position == 5
+                }
             }
         }
     }
