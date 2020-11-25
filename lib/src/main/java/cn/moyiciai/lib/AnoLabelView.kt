@@ -19,7 +19,7 @@ import androidx.core.view.children
 /**
  * Created by dx on 2020/11/14
  */
-class AnoLabelView : ViewGroup {
+class AnoLabelView<T> : ViewGroup {
 
     private val KEY = R.id.ano_label_view_key
 
@@ -142,16 +142,18 @@ class AnoLabelView : ViewGroup {
             setupItemPadding()
         }
 
+    var textProvider: TextProvider<T>? = null
+
     /**
      * 记录子控件位置
      */
     private val childRectCache: SparseArray<Rect> = SparseArray()
 
-    private var onCheckChangeListener: OnCheckedChangeListener? = null
+    private var onCheckChangeListener: OnCheckedChangeListener<T>? = null
 
-    private var onLabelClickListener: OnLabelClickListener? = null
+    private var onLabelClickListener: OnLabelClickListener<T>? = null
 
-    private var onCheckedChangeInterceptor: OnCheckedChangeInterceptor? = null
+    private var onCheckedChangeInterceptor: OnCheckedChangeInterceptor<T>? = null
 
     /**
      * 保存所有的子控件
@@ -432,10 +434,15 @@ class AnoLabelView : ViewGroup {
         onCheckChangeListener?.onCheckedChanged(view, getDataByTag(view), view.isSelected)
     }
 
-    private fun getDataByTag(view: TextView): Any = view.getTag(KEY)
+    @Suppress("UNCHECKED_CAST")
+    private fun getDataByTag(view: TextView): T = view.getTag(KEY) as T
 
-    private fun setDataByTag(view: TextView, data: Any) {
+    private fun setDataByTag(view: TextView, data: T) {
         view.setTag(KEY, data)
+    }
+
+    private fun provideText(data: T): CharSequence {
+        return textProvider?.getText(data) ?: ""
     }
 
     /**
@@ -473,7 +480,7 @@ class AnoLabelView : ViewGroup {
     /**
      * 添加标签
      */
-    private fun <T> addLabelItem(data: T, position: Int, text: CharSequence) {
+    private fun addLabelItem(data: T, position: Int, text: CharSequence) {
         val view = newChildView()
         view.run {
             this.text = text
@@ -482,7 +489,7 @@ class AnoLabelView : ViewGroup {
             setTextSize(TypedValue.COMPLEX_UNIT_PX, itemTextSize.toFloat())
             setPadding(itemPaddingLeft, itemPaddingTop, itemPaddingRight, itemPaddingBottom)
         }
-        setDataByTag(view, data as Any)
+        setDataByTag(view, data)
 
         ensureItemViewClickable(view)
 
@@ -518,61 +525,52 @@ class AnoLabelView : ViewGroup {
      * 非String类型数据的话使用TextProvider提供标签显示的文字
      */
     interface TextProvider<T> {
-        fun getText(data: T, position: Int): CharSequence
+        fun getText(data: T): CharSequence
     }
 
     /**
      * 点击监听
      */
-    interface OnLabelClickListener {
-        fun onLabelClick(view: TextView, data: Any, position: Int)
+    interface OnLabelClickListener<T> {
+        fun onLabelClick(view: TextView, data: T, position: Int)
     }
 
-    fun setOnLabelClickListener(listener: OnLabelClickListener) {
+    fun setOnLabelClickListener(listener: OnLabelClickListener<T>) {
         onLabelClickListener = listener
     }
 
     /**
      * 状态改变监听
      */
-    interface OnCheckedChangeListener {
-        fun onCheckedChanged(view: TextView, data: Any, isChecked: Boolean)
+    interface OnCheckedChangeListener<T> {
+        fun onCheckedChanged(view: TextView, data: T, isChecked: Boolean)
     }
 
-    fun setOnCheckedChangeListener(listener: OnCheckedChangeListener) {
+    fun setOnCheckedChangeListener(listener: OnCheckedChangeListener<T>) {
         onCheckChangeListener = listener
     }
 
     /**
      * 状态改变监听拦截
      */
-    interface OnCheckedChangeInterceptor {
+    interface OnCheckedChangeInterceptor<T> {
         fun onCheckedChangeIntercept(
             view: TextView,
-            data: Any,
+            data: T,
             position: Int,
             oldChecked: Boolean,
             newChecked: Boolean
         ): Boolean
     }
 
-    fun setOnCheckedChangeInterceptor(interceptor: OnCheckedChangeInterceptor) {
+    fun setOnCheckedChangeInterceptor(interceptor: OnCheckedChangeInterceptor<T>) {
         onCheckedChangeInterceptor = interceptor
     }
 
     /**
      * 设置数据
      */
-    fun setData(data: List<String>) {
-        setData(data, object : TextProvider<String> {
-            override fun getText(data: String, position: Int) = data
-        })
-    }
-
-    /**
-     * 设置数据
-     */
-    fun <T> setData(data: List<T>, textProvider: TextProvider<T>) {
+    fun setData(data: List<T>) {
         views.clear()
         removeAllViews()
 
@@ -580,7 +578,7 @@ class AnoLabelView : ViewGroup {
             addLabelItem(
                 indexed.value,
                 indexed.index,
-                textProvider.getText(indexed.value, indexed.index)
+                textProvider?.getText(indexed.value) ?: ""
             )
         }
     }
@@ -588,29 +586,15 @@ class AnoLabelView : ViewGroup {
     /**
      * 添加数据
      */
-    fun addData(data: String) {
-        addLabelItem(data, views.size, data)
+    fun addData(data: T) {
+        addLabelItem(data, views.size, provideText(data))
     }
 
     /**
      * 添加数据
      */
-    fun addData(position: Int, data: String) {
-        addLabelItem(data, position, data)
-    }
-
-    /**
-     * 添加数据
-     */
-    fun <T> addData(data: T, textProvider: TextProvider<T>) {
-        addLabelItem(data, views.size, textProvider.getText(data, views.size))
-    }
-
-    /**
-     * 添加数据
-     */
-    fun <T> addData(position: Int, data: T, textProvider: TextProvider<T>) {
-        addLabelItem(data, position, textProvider.getText(data, position))
+    fun addData(position: Int, data: T) {
+        addLabelItem(data, position, provideText(data))
     }
 
     /**
@@ -621,12 +605,23 @@ class AnoLabelView : ViewGroup {
     }
 
     /**
+     * 修改数据
+     */
+    fun editData(position: Int, data: T) {
+        if (position < 0 || position >= views.size) {
+            throw IllegalArgumentException()
+        }
+        views[position].text = provideText(data)
+        setDataByTag(views[position], data)
+    }
+
+    /**
      * 获取选中的数据
      */
     @Suppress("UNCHECKED_CAST")
-    fun <T> getCheckedData(): List<T> {
+    fun getCheckedData(): List<T> {
         return checkedViews.map {
-            getDataByTag(it) as T
+            getDataByTag(it)
         }
     }
 

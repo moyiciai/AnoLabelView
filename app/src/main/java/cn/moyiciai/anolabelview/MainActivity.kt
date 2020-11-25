@@ -14,7 +14,7 @@ import cn.moyiciai.lib.AnoLabelView
 @SuppressLint("SetTextI18n")
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var labelView: AnoLabelView
+    private lateinit var labelView: AnoLabelView<String>
 
     private var count = 20
 
@@ -23,6 +23,9 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         labelView = findViewById(R.id.label_view)
+        labelView.textProvider = object : AnoLabelView.TextProvider<String> {
+            override fun getText(data: String): CharSequence = data
+        }
 
         initControlView()
 
@@ -38,13 +41,13 @@ class MainActivity : AppCompatActivity() {
 
             labelView.run {
                 setData(data)
-                setOnCheckedChangeListener(object : AnoLabelView.OnCheckedChangeListener {
-                    override fun onCheckedChanged(view: TextView, data: Any, isChecked: Boolean) {
-                        Log.d("dx", "${data as String}, isChecked=$isChecked")
+                setOnCheckedChangeListener(object : AnoLabelView.OnCheckedChangeListener<String> {
+                    override fun onCheckedChanged(view: TextView, data: String, isChecked: Boolean) {
+                        Log.d("dx", "${data}, isChecked=$isChecked")
                     }
                 })
-                setOnLabelClickListener(object : AnoLabelView.OnLabelClickListener {
-                    override fun onLabelClick(view: TextView, data: Any, position: Int) {
+                setOnLabelClickListener(object : AnoLabelView.OnLabelClickListener<String> {
+                    override fun onLabelClick(view: TextView, data: String, position: Int) {
                         if (position == 5) {
                             Toast.makeText(
                                 this@MainActivity,
@@ -55,10 +58,10 @@ class MainActivity : AppCompatActivity() {
                         Log.d("dx", "onClick=$data")
                     }
                 })
-                setOnCheckedChangeInterceptor(object : AnoLabelView.OnCheckedChangeInterceptor {
+                setOnCheckedChangeInterceptor(object : AnoLabelView.OnCheckedChangeInterceptor<String> {
                     override fun onCheckedChangeIntercept(
                         view: TextView,
-                        data: Any,
+                        data: String,
                         position: Int,
                         oldChecked: Boolean,
                         newChecked: Boolean
@@ -162,6 +165,10 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.btn_remove_last).setOnClickListener {
             labelView.removeData(labelView.size - 1)
+        }
+
+        findViewById<Button>(R.id.btn_edit_first).setOnClickListener {
+            labelView.editData(0, "修改后的数据")
         }
     }
 }
