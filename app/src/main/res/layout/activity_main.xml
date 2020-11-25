@@ -129,15 +129,32 @@
         app:label_verticalSpace="20px"
         tools:ignore="PxUsage" />
 
-    <Button
-        android:id="@+id/btn_show_label"
+    <LinearLayout
+        style="?android:attr/buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:text="显示标签"
-        tools:ignore="HardcodedText" />
+        android:layout_marginEnd="8dp">
+
+        <Button
+            android:id="@+id/btn_show_label"
+            style="?android:attr/buttonBarStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="显示标签"
+            tools:ignore="HardcodedText" />
+
+        <Button
+            android:id="@+id/btn_show_checked_size"
+            style="?android:attr/buttonBarStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:text="显示选中数量"
+            tools:ignore="HardcodedText" />
+    </LinearLayout>
 
     <LinearLayout
         style="?android:attr/buttonBarStyle"
@@ -236,5 +253,57 @@
             android:text="修改数据"
             android:textSize="12sp"
             tools:ignore="HardcodedText" />
+
+        <Button
+            android:id="@+id/btn_clear"
+            style="?android:attr/buttonBarStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:text="清空选中"
+            android:textSize="12sp"
+            tools:ignore="HardcodedText" />
+    </LinearLayout>
+
+    <LinearLayout
+        style="?android:attr/buttonBarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp">
+
+        <Button
+            android:id="@+id/btn_check_all"
+            style="?android:attr/buttonBarStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="全选"
+            android:textSize="12sp"
+            tools:ignore="HardcodedText" />
+
+        <Button
+            android:id="@+id/btn_check_invert"
+            style="?android:attr/buttonBarStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:text="反选"
+            android:textSize="12sp"
+            tools:ignore="HardcodedText" />
+
+        <Button
+            android:id="@+id/btn_lines"
+            style="?android:attr/buttonBarStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:text="行数"
+            android:textSize="12sp"
+            tools:ignore="HardcodedText" />
+
     </LinearLayout>
 </LinearLayout>

@@ -145,6 +145,11 @@ class AnoLabelView<T> : ViewGroup {
     var textProvider: TextProvider<T>? = null
 
     /**
+     * 当前行数
+     */
+    private var lines = 0
+
+    /**
      * 记录子控件位置
      */
     private val childRectCache: SparseArray<Rect> = SparseArray()
@@ -285,6 +290,7 @@ class AnoLabelView<T> : ViewGroup {
                         measureWidth(widthMeasureSpec, maxRowWidth),
                         measureHeight(heightMeasureSpec, overallHeight)
                     )
+                    this.lines = lines
                     return
                 } else {
                     overallHeight += (verticalSpace + curRowMaxHeight)
@@ -303,6 +309,7 @@ class AnoLabelView<T> : ViewGroup {
                 l, overallHeight, curRowWidth, overallHeight + childView.measuredHeight
             )
             childRectCache.put(index, childRect)
+            this.lines = lines
         }
 
         // 记录最后一行
@@ -634,4 +641,32 @@ class AnoLabelView<T> : ViewGroup {
      * 获取已选标签的数量
      */
     fun getCheckedSize(): Int = checkedViews.size
+
+    /**
+     * 清空所有选中
+     */
+    fun clearChecked() {
+        checkedViews.toList().forEach {
+            setItemChecked(it, false)
+        }
+    }
+
+    /**
+     * 全选
+     */
+    fun checkAll() {
+        views.forEach { setItemChecked(it, true) }
+    }
+
+    /**
+     * 反选
+     */
+    fun checkInvert() {
+        views.forEach { setItemChecked(it, it.isSelected.not()) }
+    }
+
+    /**
+     * 获取显示行数
+     */
+    fun getLines() = lines
 }

@@ -42,7 +42,11 @@ class MainActivity : AppCompatActivity() {
             labelView.run {
                 setData(data)
                 setOnCheckedChangeListener(object : AnoLabelView.OnCheckedChangeListener<String> {
-                    override fun onCheckedChanged(view: TextView, data: String, isChecked: Boolean) {
+                    override fun onCheckedChanged(
+                        view: TextView,
+                        data: String,
+                        isChecked: Boolean
+                    ) {
                         Log.d("dx", "${data}, isChecked=$isChecked")
                     }
                 })
@@ -58,7 +62,8 @@ class MainActivity : AppCompatActivity() {
                         Log.d("dx", "onClick=$data")
                     }
                 })
-                setOnCheckedChangeInterceptor(object : AnoLabelView.OnCheckedChangeInterceptor<String> {
+                setOnCheckedChangeInterceptor(object :
+                    AnoLabelView.OnCheckedChangeInterceptor<String> {
                     override fun onCheckedChangeIntercept(
                         view: TextView,
                         data: String,
@@ -79,6 +84,10 @@ class MainActivity : AppCompatActivity() {
         val tvTextSize = findViewById<TextView>(R.id.tv_text_size)
         val tvMaxLines = findViewById<TextView>(R.id.tv_max_lines)
         val tvPadding = findViewById<TextView>(R.id.tv_padding)
+
+        findViewById<Button>(R.id.btn_show_checked_size).setOnClickListener {
+            Toast.makeText(this, "已选中${labelView.getCheckedSize()}个", Toast.LENGTH_SHORT).show()
+        }
 
         findViewById<SeekBar>(R.id.seekBar_horizontal_space).setOnSeekBarChangeListener(object :
             SeekBar.OnSeekBarChangeListener {
@@ -169,6 +178,22 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.btn_edit_first).setOnClickListener {
             labelView.editData(0, "修改后的数据")
+        }
+
+        findViewById<Button>(R.id.btn_clear).setOnClickListener {
+            labelView.clearChecked()
+        }
+
+        findViewById<Button>(R.id.btn_check_all).setOnClickListener {
+            labelView.checkAll()
+        }
+
+        findViewById<Button>(R.id.btn_check_invert).setOnClickListener {
+            labelView.checkInvert()
+        }
+
+        findViewById<Button>(R.id.btn_lines).setOnClickListener {
+            Toast.makeText(this, "${labelView.getLines()}", Toast.LENGTH_SHORT).show()
         }
     }
 }
