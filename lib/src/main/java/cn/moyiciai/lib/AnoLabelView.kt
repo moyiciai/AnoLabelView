@@ -8,6 +8,7 @@ import android.graphics.Rect
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
+import android.util.Log
 import android.util.SparseArray
 import android.util.TypedValue
 import android.view.View
@@ -154,12 +155,21 @@ class AnoLabelView<T> : ViewGroup {
      */
     private val childRectCache: SparseArray<Rect> = SparseArray()
 
-    private var onCheckChangeListener: ((TextView, T, Boolean) -> Unit)? = null
+    /**
+     * 标签选中状态改变时回调
+     */
+    private var onCheckChangeListener: ((TextView, T, Int, Boolean) -> Unit)? = null
 
-    private var onLabelClickListener: ((TextView, T, Int) -> Unit)? = null
+    /**
+     * 标签被点击时回调
+     */
+    private var onLabelClickListener: ((TextView, T, Int, Boolean) -> Unit)? = null
 
-    private var onCheckedChangeInterceptor: ((TextView, T, Int, Boolean, Boolean) -> Boolean)?
-            = null
+    /**
+     * 标签选中状态拦截器，返回true表示拦截标签的状态改变
+     */
+    private var onCheckedChangeInterceptor: ((TextView, T, Int, Boolean, Boolean) -> Boolean)? =
+        null
 
     /**
      * 保存所有的子控件
@@ -330,7 +340,8 @@ class AnoLabelView<T> : ViewGroup {
                 val rect = childRectCache[i]
                 getChildAt(i).layout(rect.left, rect.top, rect.right, rect.bottom)
             } else {
-                // 通过改变横向间隔导致最大行数超过限制，多余出来的View可能已经被布局过，所以此处要把它们的位置清零
+                // 通过改变横向间隔导致最大行数超过限制，多余出来的View可能已经被布局过，
+                // 所以此处要把它们的位置清零
                 getChildAt(i).layout(0, 0, 0, 0)
             }
         }
@@ -422,7 +433,12 @@ class AnoLabelView<T> : ViewGroup {
                 } else {
                     val tmp = views[singleCheckedPosition]
                     setItemChecked(tmp, false)
-                    onCheckChangeListener?.invoke(tmp, getDataByTag(tmp), false)
+                    onCheckChangeListener?.invoke(
+                        tmp,
+                        getDataByTag(tmp),
+                        singleCheckedPosition,
+                        false
+                    )
                     setItemChecked(view, true)
                     singleCheckedPosition = position
                 }
@@ -432,13 +448,13 @@ class AnoLabelView<T> : ViewGroup {
             }
         } else if (checkType == CheckType.MULTI) {
             if (view.isSelected.not() && checkedViews.size == maxCheckedCount) {
-                onLabelClickListener?.invoke(view, getDataByTag(view), position)
+                onLabelClickListener?.invoke(view, getDataByTag(view), position, view.isSelected)
                 return@OnClickListener
             }
             toggleViewChecked(view)
         }
-        onLabelClickListener?.invoke(view, getDataByTag(view), position)
-        onCheckChangeListener?.invoke(view, getDataByTag(view), view.isSelected)
+        onLabelClickListener?.invoke(view, getDataByTag(view), position, view.isSelected)
+        onCheckChangeListener?.invoke(view, getDataByTag(view), position, view.isSelected)
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -471,6 +487,9 @@ class AnoLabelView<T> : ViewGroup {
         else checkedViews.remove(view)
     }
 
+    /**
+     * 切换item选中状态
+     */
     private fun toggleViewChecked(view: TextView) {
         setItemChecked(view, !view.isSelected)
     }
@@ -509,7 +528,10 @@ class AnoLabelView<T> : ViewGroup {
      */
     private fun removeLabelItem(position: Int) {
         if (position < 0 || position >= views.size) return
-        views.removeAt(position)
+        val removedView = views.removeAt(position)
+        if (checkedViews.contains(removedView)) {
+            checkedViews.remove(removedView)
+        }
         removeViewAt(position)
     }
 
@@ -535,11 +557,11 @@ class AnoLabelView<T> : ViewGroup {
         fun getText(data: T): CharSequence
     }
 
-    fun setOnLabelClickListener(listener: (view: TextView, data: T, position: Int) -> Unit) {
+    fun setOnLabelClickListener(listener: (view: TextView, data: T, position: Int, isChecked: Boolean) -> Unit) {
         onLabelClickListener = listener
     }
 
-    fun setOnCheckedChangeListener(listener: (view: TextView, data: T, isChecked: Boolean) -> Unit) {
+    fun setOnCheckedChangeListener(listener: (view: TextView, data: T, position: Int, isChecked: Boolean) -> Unit) {
         onCheckChangeListener = listener
     }
 
@@ -616,7 +638,7 @@ class AnoLabelView<T> : ViewGroup {
     /**
      * 是否已达到最大选择数
      */
-    fun isCheckedMax(): Boolean = views.size == maxCheckedCount
+    fun isCheckedMax(): Boolean = checkedViews.size == maxCheckedCount
 
     /**
      * 获取已选标签的数量

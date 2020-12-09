@@ -41,11 +41,16 @@ class MainActivity : AppCompatActivity() {
 
             labelView.run {
                 setData(data)
-                setOnCheckedChangeListener { view, data, isChecked ->
+                setOnCheckedChangeListener { view, data, position, isChecked ->
                     Log.d("dx", "${data}, isChecked=$isChecked")
                 }
-                setOnLabelClickListener { view, data, position ->
-                    if (position == 5) {
+                setOnLabelClickListener { view, data, position, isChecked ->
+                    if (isCheckedMax()) {
+                        Toast.makeText(this@MainActivity, "已达到最大点击数", Toast.LENGTH_SHORT).show()
+                        return@setOnLabelClickListener
+                    }
+
+                    if (data == "不可点击") {
                         Toast.makeText(
                             this@MainActivity,
                             "当前标签被设置为不可点击",
@@ -55,7 +60,7 @@ class MainActivity : AppCompatActivity() {
                     Log.d("dx", "onClick=$data")
                 }
                 setOnCheckedChangeInterceptor { view, data, position, oldChecked, newChecked ->
-                    position == 5
+                    data == "不可点击"
                 }
             }
         }
