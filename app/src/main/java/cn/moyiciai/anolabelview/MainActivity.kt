@@ -23,9 +23,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         labelView = findViewById(R.id.label_view)
-        labelView.textProvider = object : AnoLabelView.TextProvider<String> {
-            override fun getText(data: String): CharSequence = data
-        }
+        labelView.textProvider = { it }
 
         initControlView()
 

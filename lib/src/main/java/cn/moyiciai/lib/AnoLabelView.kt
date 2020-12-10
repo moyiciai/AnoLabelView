@@ -143,7 +143,11 @@ class AnoLabelView<T> : ViewGroup {
             setupItemPadding()
         }
 
-    var textProvider: TextProvider<T>? = null
+    /**
+     * AnoLabelView可以存储任何类型的数据，
+     * 非String类型数据的话使用TextProvider提供标签显示的文字
+     */
+    var textProvider: ((T) -> CharSequence)? = null
 
     /**
      * 当前行数
@@ -465,7 +469,7 @@ class AnoLabelView<T> : ViewGroup {
     }
 
     private fun provideText(data: T): CharSequence {
-        return textProvider?.getText(data) ?: ""
+        return textProvider?.invoke(data) ?: ""
     }
 
     /**
@@ -549,14 +553,6 @@ class AnoLabelView<T> : ViewGroup {
         }
     }
 
-    /**
-     * AnoLabelView可以存储任何类型的数据，
-     * 非String类型数据的话使用TextProvider提供标签显示的文字
-     */
-    interface TextProvider<T> {
-        fun getText(data: T): CharSequence
-    }
-
     fun setOnLabelClickListener(listener: (view: TextView, data: T, position: Int, isChecked: Boolean) -> Unit) {
         onLabelClickListener = listener
     }
@@ -588,7 +584,7 @@ class AnoLabelView<T> : ViewGroup {
             addLabelItem(
                 indexed.value,
                 indexed.index,
-                textProvider?.getText(indexed.value) ?: ""
+                textProvider?.invoke(indexed.value) ?: ""
             )
         }
     }
