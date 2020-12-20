@@ -1,6 +1,8 @@
 plugins {
     id 'com.android.library'
     id 'kotlin-android'
+    id 'com.jfrog.bintray' version '1.8.5'
+    id 'maven-publish'
 }
 
 android {
@@ -29,6 +31,56 @@ android {
     }
     kotlinOptions {
         jvmTarget = '1.8'
+    }
+}
+
+Properties prop = new Properties()
+File deployFile = rootProject.file('lib/deploy.properties')
+if (deployFile.exists()) {
+    prop.load(deployFile.newDataInputStream())
+} else {
+    throw new Error("Cannot find deploy.properties file in gradle folder")
+}
+
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+                artifact sourcesJar
+                groupId prop.getProperty('groupId')
+                artifactId prop.getProperty('artifactId')
+                version prop.getProperty('version')
+            }
+        }
+    }
+}
+
+bintray {
+    user = prop.getProperty('bintray.user')
+    key = prop.getProperty('bintray.api')
+    publications = ['release']
+    publish = true
+    override = true
+    pkg {
+        repo = prop.getProperty('bintray.repo')
+        name = prop.getProperty('pkgName')
+        desc = prop.getProperty("desc")
+        licenses = ['Apache-2.0']
+        vcsUrl = prop.getProperty('vcsUrl')
+        websiteUrl = prop.getProperty("vcsUrl")
+        issueTrackerUrl = prop.getProperty("")
+        publicDownloadNumbers = true
+        version {
+            name = prop.getProperty('version')
+            vcsTag = prop.getProperty('version')
+            released = new Date()
+        }
     }
 }
 
