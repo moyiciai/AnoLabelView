@@ -432,19 +432,20 @@ class AnoLabelView<T> : ViewGroup {
 
         if (checkType == CheckType.SINGLE) {
             if (singleCheckedPosition >= 0) {
-                if (view == views[singleCheckedPosition]) {
+                singleCheckedPosition = if (view == views[singleCheckedPosition]) {
                     setItemChecked(view, false)
+                    -1
                 } else {
                     val tmp = views[singleCheckedPosition]
                     setItemChecked(tmp, false)
                     onCheckChangeListener?.invoke(
-                        tmp,
-                        getDataByTag(tmp),
-                        singleCheckedPosition,
-                        false
+                            tmp,
+                            getDataByTag(tmp),
+                            singleCheckedPosition,
+                            false
                     )
                     setItemChecked(view, true)
-                    singleCheckedPosition = position
+                    position
                 }
             } else {
                 setItemChecked(view, true)
