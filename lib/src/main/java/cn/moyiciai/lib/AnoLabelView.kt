@@ -645,6 +645,9 @@ class AnoLabelView<T> : ViewGroup {
      * 清空所有选中
      */
     fun clearChecked() {
+        if (checkType == CheckType.SINGLE) {
+            singleCheckedPosition = -1
+        }
         checkedViews.toList().forEach {
             setItemChecked(it, false)
         }
