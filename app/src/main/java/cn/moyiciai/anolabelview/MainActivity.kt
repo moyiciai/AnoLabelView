@@ -16,7 +16,7 @@ class MainActivity : AppCompatActivity() {
     
     private val TAG = "MainActivity"
 
-    private lateinit var labelView: AnoLabelView<String>
+    private lateinit var labelView: AnoLabelView
 
     private var count = 20
 
@@ -25,7 +25,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         labelView = findViewById(R.id.label_view)
-        labelView.textProvider = { it }
+        labelView.textProvider = { it.toString() }
 
         initControlView()
 

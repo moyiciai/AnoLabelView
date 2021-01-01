@@ -20,7 +20,7 @@ import androidx.core.view.children
 /**
  * Created by moyiciai on 2020/11/14
  */
-class AnoLabelView<T> : ViewGroup {
+class AnoLabelView : ViewGroup {
 
     private val KEY = R.id.ano_label_view_key
 
@@ -147,7 +147,7 @@ class AnoLabelView<T> : ViewGroup {
      * AnoLabelView可以存储任何类型的数据，
      * 非String类型数据的话使用TextProvider提供标签显示的文字
      */
-    var textProvider: ((T) -> CharSequence)? = null
+    var textProvider: ((Any) -> CharSequence)? = null
 
     /**
      * 当前行数
@@ -162,17 +162,17 @@ class AnoLabelView<T> : ViewGroup {
     /**
      * 标签选中状态改变时回调
      */
-    private var onCheckChangeListener: ((TextView, T, Int, Boolean) -> Unit)? = null
+    private var onCheckChangeListener: ((TextView, Any, Int, Boolean) -> Unit)? = null
 
     /**
      * 标签被点击时回调
      */
-    private var onLabelClickListener: ((TextView, T, Int, Boolean) -> Unit)? = null
+    private var onLabelClickListener: ((TextView, Any, Int, Boolean) -> Unit)? = null
 
     /**
      * 标签选中状态拦截器，返回true表示拦截标签的状态改变
      */
-    private var onCheckedChangeInterceptor: ((TextView, T, Int, Boolean, Boolean) -> Boolean)? =
+    private var onCheckedChangeInterceptor: ((TextView, Any, Int, Boolean, Boolean) -> Boolean)? =
         null
 
     /**
@@ -439,10 +439,10 @@ class AnoLabelView<T> : ViewGroup {
                     val tmp = views[singleCheckedPosition]
                     setItemChecked(tmp, false)
                     onCheckChangeListener?.invoke(
-                            tmp,
-                            getDataByTag(tmp),
-                            singleCheckedPosition,
-                            false
+                        tmp,
+                        getDataByTag(tmp),
+                        singleCheckedPosition,
+                        false
                     )
                     setItemChecked(view, true)
                     position
@@ -463,13 +463,13 @@ class AnoLabelView<T> : ViewGroup {
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun getDataByTag(view: TextView): T = view.getTag(KEY) as T
+    private fun getDataByTag(view: TextView): Any = view.getTag(KEY)
 
-    private fun setDataByTag(view: TextView, data: T) {
+    private fun setDataByTag(view: TextView, data: Any) {
         view.setTag(KEY, data)
     }
 
-    private fun provideText(data: T): CharSequence {
+    private fun provideText(data: Any): CharSequence {
         return textProvider?.invoke(data) ?: ""
     }
 
@@ -511,7 +511,7 @@ class AnoLabelView<T> : ViewGroup {
     /**
      * 添加标签
      */
-    private fun addLabelItem(data: T, position: Int, text: CharSequence) {
+    private fun addLabelItem(data: Any, position: Int, text: CharSequence) {
         val view = newChildView()
         view.run {
             this.text = text
@@ -554,18 +554,18 @@ class AnoLabelView<T> : ViewGroup {
         }
     }
 
-    fun setOnLabelClickListener(listener: (view: TextView, data: T, position: Int, isChecked: Boolean) -> Unit) {
+    fun setOnLabelClickListener(listener: (view: TextView, data: Any, position: Int, isChecked: Boolean) -> Unit) {
         onLabelClickListener = listener
     }
 
-    fun setOnCheckedChangeListener(listener: (view: TextView, data: T, position: Int, isChecked: Boolean) -> Unit) {
+    fun setOnCheckedChangeListener(listener: (view: TextView, data: Any, position: Int, isChecked: Boolean) -> Unit) {
         onCheckChangeListener = listener
     }
 
     fun setOnCheckedChangeInterceptor(
         interceptor: (
             view: TextView,
-            data: T,
+            data: Any,
             position: Int,
             oldChecked: Boolean,
             newChecked: Boolean
@@ -577,7 +577,7 @@ class AnoLabelView<T> : ViewGroup {
     /**
      * 设置数据
      */
-    fun setData(data: List<T>) {
+    fun setData(data: List<Any>) {
         views.clear()
         removeAllViews()
 
@@ -585,7 +585,7 @@ class AnoLabelView<T> : ViewGroup {
             addLabelItem(
                 indexed.value,
                 indexed.index,
-                textProvider?.invoke(indexed.value) ?: ""
+                provideText(indexed.value)
             )
         }
     }
@@ -593,14 +593,14 @@ class AnoLabelView<T> : ViewGroup {
     /**
      * 添加数据
      */
-    fun addData(data: T) {
+    fun addData(data: Any) {
         addLabelItem(data, views.size, provideText(data))
     }
 
     /**
      * 添加数据
      */
-    fun addData(position: Int, data: T) {
+    fun addData(position: Int, data: Any) {
         addLabelItem(data, position, provideText(data))
     }
 
@@ -614,7 +614,7 @@ class AnoLabelView<T> : ViewGroup {
     /**
      * 修改数据
      */
-    fun editData(position: Int, data: T) {
+    fun editData(position: Int, data: Any) {
         if (position < 0 || position >= views.size) {
             throw IllegalArgumentException()
         }
@@ -626,9 +626,9 @@ class AnoLabelView<T> : ViewGroup {
      * 获取选中的数据
      */
     @Suppress("UNCHECKED_CAST")
-    fun getCheckedData(): List<T> {
+    fun <T> getCheckedData(): List<T> {
         return checkedViews.map {
-            getDataByTag(it)
+            getDataByTag(it) as T
         }
     }
 
