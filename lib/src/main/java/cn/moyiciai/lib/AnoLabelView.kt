@@ -190,10 +190,18 @@ class AnoLabelView : ViewGroup {
      */
     private var singleCheckedPosition: Int = -1
 
-    constructor(context: Context) : super(context)
+    /**
+     * 预览时，显示的标签个数
+     */
+    private var previewItemCount = 10
+
+    constructor(context: Context) : super(context) {
+        preview()
+    }
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
         initAttrs(context, attrs)
+        preview()
     }
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
@@ -202,6 +210,7 @@ class AnoLabelView : ViewGroup {
         defStyleAttr
     ) {
         initAttrs(context, attrs)
+        preview()
     }
 
     private fun initAttrs(context: Context, attrs: AttributeSet?) {
@@ -259,6 +268,9 @@ class AnoLabelView : ViewGroup {
                 }
                 R.styleable.AnoLabelView_label_item_paddingBottom -> {
                     itemPaddingBottom = ta.getDimensionPixelSize(attr, 0)
+                }
+                R.styleable.AnoLabelView_label_item_preview_count -> {
+                    previewItemCount = ta.getInt(attr, previewItemCount)
                 }
             }
         }
@@ -352,11 +364,23 @@ class AnoLabelView : ViewGroup {
     }
 
     /**
+     * 提供xml预览
+     */
+    private fun preview() {
+        val list = mutableListOf<String>()
+        textProvider = { it.toString() }
+        for (i in 0 until previewItemCount) {
+            list.add("item $i")
+        }
+        setData(list)
+    }
+
+    /**
      * 测量自身宽度
      */
     private fun measureWidth(measureSpec: Int, contentWidth: Int): Int {
         val mode = MeasureSpec.getMode(measureSpec)
-        val size = MeasureSpec.getSize(contentWidth)
+        val size = MeasureSpec.getSize(measureSpec)
         var resultSize: Int
 
         when (mode) {

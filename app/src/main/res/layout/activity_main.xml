@@ -123,6 +123,7 @@
         app:label_horizontalSpace="20px"
         app:label_item_background="@drawable/label_item_bg"
         app:label_item_padding="10px"
+        app:label_item_preview_count="10"
         app:label_item_textColor="@color/label_item_text_color"
         app:label_item_textSize="45px"
         app:label_maxLines="10"

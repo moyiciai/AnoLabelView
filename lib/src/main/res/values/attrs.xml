@@ -12,6 +12,7 @@
         <attr name="label_item_paddingTop" format="dimension" />
         <attr name="label_item_paddingRight" format="dimension" />
         <attr name="label_item_paddingBottom" format="dimension" />
+        <attr name="label_item_preview_count" format="integer" />
         <attr name="label_check_type" format="enum">
             <enum name="none" value="1" />
             <enum name="single" value="2" />
