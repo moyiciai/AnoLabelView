@@ -147,7 +147,7 @@ class AnoLabelView : ViewGroup {
      * AnoLabelView可以存储任何类型的数据，
      * 非String类型数据的话使用TextProvider提供标签显示的文字
      */
-    var textProvider: ((Any) -> CharSequence)? = null
+    var textProvider: ((Any?) -> CharSequence)? = { it?.toString() ?: "" }
 
     /**
      * 当前行数
