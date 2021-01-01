@@ -13,6 +13,8 @@ import cn.moyiciai.lib.AnoLabelView
 
 @SuppressLint("SetTextI18n")
 class MainActivity : AppCompatActivity() {
+    
+    private val TAG = "MainActivity"
 
     private lateinit var labelView: AnoLabelView<String>
 
@@ -40,7 +42,7 @@ class MainActivity : AppCompatActivity() {
             labelView.run {
                 setData(data)
                 setOnCheckedChangeListener { view, data, position, isChecked ->
-                    Log.d("dx", "${data}, isChecked=$isChecked")
+                    Log.d(TAG, "${data}, isChecked=$isChecked")
                 }
                 setOnLabelClickListener { view, data, position, isChecked ->
                     if (isCheckedMax()) {
@@ -55,7 +57,7 @@ class MainActivity : AppCompatActivity() {
                             Toast.LENGTH_SHORT
                         ).show()
                     }
-                    Log.d("dx", "onClick=$data")
+                    Log.d(TAG, "onClick=$data")
                 }
                 setOnCheckedChangeInterceptor { view, data, position, oldChecked, newChecked ->
                     data == "不可点击"

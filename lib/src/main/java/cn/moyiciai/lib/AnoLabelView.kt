@@ -18,7 +18,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.children
 
 /**
- * Created by dx on 2020/11/14
+ * Created by moyiciai on 2020/11/14
  */
 class AnoLabelView<T> : ViewGroup {
 
