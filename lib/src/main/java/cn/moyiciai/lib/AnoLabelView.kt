@@ -310,6 +310,8 @@ class AnoLabelView : ViewGroup {
 
             // 需要换行的情况
             if (childView.measuredWidth + curRowWidth >= maxWidth) {
+                // 去掉额外添加的 horizontalSpace 宽度
+                if (newRow.not()) curRowWidth -= horizontalSpace
                 maxRowWidth = curRowWidth.coerceAtLeast(maxRowWidth)
                 if (lines == maxLines) { // 达到最大行数限制时结束测量
                     overallHeight += curRowMaxHeight
