@@ -696,4 +696,9 @@ class AnoLabelView : ViewGroup {
      * 获取显示行数
      */
     fun getLines() = lines
+
+    /**
+     * 标签是否全部显示
+     */
+    fun isFullDisplay() = childCount == childRectCache.size()
 }
