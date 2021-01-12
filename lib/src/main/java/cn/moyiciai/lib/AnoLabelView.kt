@@ -8,7 +8,6 @@ import android.graphics.Rect
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
-import android.util.Log
 import android.util.SparseArray
 import android.util.TypedValue
 import android.view.View
@@ -147,7 +146,7 @@ class AnoLabelView : ViewGroup {
      * AnoLabelView可以存储任何类型的数据，
      * 非String类型数据的话使用TextProvider提供标签显示的文字
      */
-    var textProvider: ((Any) -> CharSequence)? = null
+    var textProvider: ((Any) -> CharSequence) = { it.toString() }
 
     /**
      * 当前行数
@@ -370,7 +369,6 @@ class AnoLabelView : ViewGroup {
         if (isInEditMode.not()) return
 
         val list = mutableListOf<String>()
-        textProvider = { it.toString() }
         for (i in 0 until previewItemCount) {
             list.add("item $i")
         }
@@ -496,7 +494,7 @@ class AnoLabelView : ViewGroup {
     }
 
     private fun provideText(data: Any): CharSequence {
-        return textProvider?.invoke(data) ?: ""
+        return textProvider.invoke(data)
     }
 
     /**
