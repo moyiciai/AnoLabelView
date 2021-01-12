@@ -140,4 +140,7 @@ checkInvert()
 
 // 获取选中行数
 getLines()
+
+// 标签是否全部显示
+isFullDisplay()
 ```
