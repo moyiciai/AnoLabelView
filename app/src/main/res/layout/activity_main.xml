@@ -305,6 +305,19 @@
             android:text="行数"
             android:textSize="12sp"
             tools:ignore="HardcodedText" />
+    </LinearLayout>
 
+    <LinearLayout
+        style="?android:attr/buttonBarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp">
+
+        <Button
+            android:id="@+id/btn_is_full_display"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="是否全部显示" />
     </LinearLayout>
 </LinearLayout>
