@@ -367,6 +367,8 @@ class AnoLabelView : ViewGroup {
      * 提供xml预览
      */
     private fun preview() {
+        if (isInEditMode.not()) return
+
         val list = mutableListOf<String>()
         textProvider = { it.toString() }
         for (i in 0 until previewItemCount) {
