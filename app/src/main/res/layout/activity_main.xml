@@ -112,23 +112,30 @@
             android:progress="10" />
     </LinearLayout>
 
-    <cn.moyiciai.lib.AnoLabelView
-        android:id="@+id/label_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Hello World!"
-        app:label_check_maxNum="5"
-        app:label_check_type="multi"
-        app:label_horizontalSpace="20px"
-        app:label_item_background="@drawable/label_item_bg"
-        app:label_item_padding="10px"
-        app:label_item_preview_count="10"
-        app:label_item_textColor="@color/label_item_text_color"
-        app:label_item_textSize="45px"
-        app:label_maxLines="10"
-        app:label_verticalSpace="20px"
-        tools:ignore="PxUsage" />
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <cn.moyiciai.lib.AnoLabelView
+            android:id="@+id/label_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Hello World!"
+            app:label_check_maxNum="5"
+            app:label_check_type="multi"
+            app:label_horizontalSpace="20px"
+            app:label_item_background="@drawable/label_item_bg"
+            app:label_item_padding="10px"
+            app:label_item_preview_count="10"
+            app:label_item_textSize="45px"
+            app:label_maxLines="10"
+            app:label_verticalSpace="20px"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="PxUsage" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
         style="?android:attr/buttonBarStyle"
@@ -308,7 +315,6 @@
     </LinearLayout>
 
     <LinearLayout
-        style="?android:attr/buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"

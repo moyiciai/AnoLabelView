@@ -49,7 +49,7 @@ class AnoLabelView : ViewGroup {
     /**
      * 标签的文字颜色
      */
-    var itemTextColor: ColorStateList? = null
+    var itemTextColor: ColorStateList? = ColorStateList.valueOf(0xFF000000.toInt())
 
     /**
      * 标签的文字大小
