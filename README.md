@@ -143,6 +143,9 @@ getLines()
 
 // 标签是否全部显示
 isFullDisplay()
+
+// 清空数据
+clearData()
 ```
 
 **7.可设置的属性**

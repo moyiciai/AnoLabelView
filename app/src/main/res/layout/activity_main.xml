@@ -318,12 +318,24 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp">
+        android:layout_marginEnd="8dp"
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/btn_is_full_display"
-            android:layout_width="match_parent"
+            style="?android:attr/buttonBarStyle"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="是否全部显示" />
+
+        <Button
+            android:id="@+id/btn_clear_data"
+            style="?android:attr/buttonBarStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:text="清空数据" />
     </LinearLayout>
 </LinearLayout>

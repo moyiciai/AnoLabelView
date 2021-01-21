@@ -11,6 +11,7 @@ import android.util.AttributeSet
 import android.util.SparseArray
 import android.util.TypedValue
 import android.view.View
+import android.view.View.OnClickListener
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -601,18 +602,24 @@ class AnoLabelView : ViewGroup {
     }
 
     /**
+     * 清空数据
+     */
+    fun clearData() {
+        views.clear()
+        checkedViews.clear()
+        removeAllViews()
+    }
+
+    /**
      * 设置数据
      */
-    fun setData(data: List<Any>) {
-        views.clear()
-        removeAllViews()
+    fun setData(data: List<Any>?) {
+        clearData()
+
+        if (data == null) return
 
         for (indexed in data.withIndex()) {
-            addLabelItem(
-                indexed.value,
-                indexed.index,
-                provideText(indexed.value)
-            )
+            addLabelItem(indexed.value, indexed.index, provideText(indexed.value))
         }
     }
 

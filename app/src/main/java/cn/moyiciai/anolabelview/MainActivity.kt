@@ -187,5 +187,9 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btn_is_full_display).setOnClickListener {
             Toast.makeText(this, "${labelView.isFullDisplay()}", Toast.LENGTH_SHORT).show()
         }
+
+        findViewById<Button>(R.id.btn_clear_data).setOnClickListener {
+            labelView.setData(null)
+        }
     }
 }
