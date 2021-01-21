@@ -144,3 +144,40 @@ getLines()
 // 标签是否全部显示
 isFullDisplay()
 ```
+
+**7.可设置的属性**
+
+```kotlin
+// 标签间的横向间隔
+horizontalSpace = 0
+
+// 标签间的纵向间隔
+verticalSpace = 0
+
+// 标签背景
+itemBackground: Drawable? = null
+
+// 标签文字颜色
+itemTextColor: ColorStateList? = ColorStateList.valueOf(0xFF000000.toInt())
+
+// 标签的文字大小（像素）
+itemTextSize: Int = 30
+
+// 修改为不可选时会清空所有的已选项；
+// 单选改为多选时，如果有标签被选中并且maxCheckedCount小于1，那么maxCheckedCount会被置为1；
+// 多选改为单选时，会清空所有的已选项。
+checkType: CheckType = CheckType.NONE
+
+// 最大选择数；
+// 在多选模式下，如果设置的最大选择数小于已选数量，设置将不会有效。
+maxCheckedCount
+
+// 最大显示行数，为负数或0则不限制
+maxLines
+
+// 标签内边距
+itemPaddingLeft
+itemPaddingTop
+itemPaddingRight
+itemPaddingBottom
+```
