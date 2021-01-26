@@ -5,7 +5,7 @@
 **1.引入依赖：**
 
 ```
-implementation 'cn.moyiciai:ano-labelview:1.1.0'
+implementation 'cn.moyiciai:ano-labelview:1.1.6'
 ```
 
 **2.编写xml布局**
