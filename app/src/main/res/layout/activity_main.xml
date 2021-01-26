@@ -142,7 +142,7 @@
             android:id="@+id/label_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="20px"
+            android:padding="10px"
             app:label_check_maxNum="5"
             app:label_check_type="multi"
             app:label_horizontalSpace="20px"

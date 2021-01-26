@@ -1,14 +1,11 @@
 package cn.moyiciai.lib
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
-import android.graphics.Rect
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
-import android.util.Log
 import android.util.SparseArray
 import android.util.TypedValue
 import android.view.View
@@ -20,6 +17,8 @@ import androidx.core.view.children
 
 /**
  * Created by moyiciai on 2020/11/14
+ *
+ * v1.1.6
  */
 class AnoLabelView : ViewGroup {
 
@@ -158,7 +157,7 @@ class AnoLabelView : ViewGroup {
     /**
      * 记录子控件位置
      */
-    private val childLayoutCache: SparseArray<Rect> = SparseArray()
+    private val childLayoutCache: SparseArray<Array<Int>> = SparseArray()
 
     /**
      * 标签选中状态改变时回调
@@ -278,7 +277,6 @@ class AnoLabelView : ViewGroup {
         ta.recycle()
     }
 
-    @SuppressLint("DrawAllocation")
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         childLayoutCache.clear()
 
@@ -328,8 +326,8 @@ class AnoLabelView : ViewGroup {
             val itemTop = overallHeight
             val itemRight = itemLeft + childView.measuredWidth
             val itemBottom = itemTop + childView.measuredHeight
-            val layoutRect = Rect(itemLeft, itemTop, itemRight, itemBottom)
-            childLayoutCache.put(indexedValue.index, layoutRect)
+            val layoutCache = arrayOf(itemLeft, itemTop, itemRight, itemBottom)
+            childLayoutCache.put(indexedValue.index, layoutCache)
 
             curRowWidth = itemRight
             isNewRow = false
@@ -354,8 +352,8 @@ class AnoLabelView : ViewGroup {
         for (indexed in children.withIndex()) {
             val i = indexed.index
             if (i < childLayoutCache.size()) {
-                val rect = childLayoutCache[i]
-                getChildAt(i).layout(rect.left, rect.top, rect.right, rect.bottom)
+                val layoutCache = childLayoutCache[i]
+                getChildAt(i).layout(layoutCache[0], layoutCache[1], layoutCache[2], layoutCache[3])
             } else {
                 // 通过改变横向间隔导致最大行数超过限制，多余出来的View可能已经被布局过，
                 // 所以此处要把它们的位置清零
