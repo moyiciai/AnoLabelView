@@ -8,6 +8,7 @@ import android.graphics.Rect
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
+import android.util.Log
 import android.util.SparseArray
 import android.util.TypedValue
 import android.view.View
@@ -157,7 +158,7 @@ class AnoLabelView : ViewGroup {
     /**
      * 记录子控件位置
      */
-    private val childRectCache: SparseArray<Rect> = SparseArray()
+    private val childLayoutCache: SparseArray<Rect> = SparseArray()
 
     /**
      * 标签选中状态改变时回调
@@ -279,71 +280,69 @@ class AnoLabelView : ViewGroup {
 
     @SuppressLint("DrawAllocation")
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        childRectCache.clear()
+        childLayoutCache.clear()
 
         // 记录整体高度
-        var overallHeight = 0
-        // 记录最宽的行宽
-        var maxRowWidth = 0
-        // 记录当前行宽
-        var curRowWidth = 0
+        var overallHeight = paddingTop
         // 记录当前行中item的最大高度
         var curRowMaxHeight = 0
+        // 记录最宽的行宽，初始化为（paddingStart + paddingEnd），可以在没有数据的时候让paddingStart也生效
+        var maxRowWidth = paddingStart + paddingEnd
+        // 记录当前行宽，初始化为paddingStart，可以在没有数据的时候让paddingStart也生效
+        var curRowWidth = paddingStart
         // 最大宽度，如果超过则需要换行
-        val maxWidth = MeasureSpec.getSize(widthMeasureSpec) - paddingLeft - paddingRight
-        // 新的一行
-        var newRow = true
+        val maxWidth = MeasureSpec.getSize(widthMeasureSpec)
         // 记录当前行数
         var lines = 1
+        var isNewRow = true
+        var isMaxLines = false
 
-        var l: Int
+        for (indexedValue in children.withIndex()) {
+            val childView = indexedValue.value
 
-        for (i in children.withIndex()) {
-            val childView = i.value
-            val index = i.index
-
-            if (newRow) newRow = false
-            else curRowWidth += horizontalSpace
-
-            l = curRowWidth
             measureChild(childView, widthMeasureSpec, heightMeasureSpec)
+            curRowMaxHeight = curRowMaxHeight.coerceAtLeast(childView.measuredHeight)
 
-            // 需要换行的情况
-            if (childView.measuredWidth + curRowWidth >= maxWidth) {
-                // 去掉额外添加的 horizontalSpace 宽度
-                if (newRow.not()) curRowWidth -= horizontalSpace
-                maxRowWidth = curRowWidth.coerceAtLeast(maxRowWidth)
-                if (lines == maxLines) { // 达到最大行数限制时结束测量
-                    overallHeight += curRowMaxHeight
-                    setMeasuredDimension(
-                        measureWidth(widthMeasureSpec, maxRowWidth),
-                        measureHeight(heightMeasureSpec, overallHeight)
-                    )
-                    this.lines = lines
-                    return
-                } else {
-                    overallHeight += (verticalSpace + curRowMaxHeight)
-                }
-                curRowWidth = 0
-                curRowMaxHeight = 0
-                l = 0
-                lines++
+            if (isNewRow) {
+                curRowWidth = paddingStart
             }
 
-            curRowMaxHeight = curRowMaxHeight.coerceAtLeast(childView.measuredHeight)
-            curRowWidth += childView.measuredWidth
+            // 新的一行
+            if (curRowWidth + horizontalSpace + childView.measuredWidth + paddingEnd > maxWidth) {
+//                curRowWidth -= horizontalSpace
+                maxRowWidth = maxRowWidth.coerceAtLeast(curRowWidth + paddingEnd)
+                overallHeight += curRowMaxHeight
+                if (maxLines <= 0 || lines < maxLines) {
+                    overallHeight += verticalSpace
+                    lines++
+                } else {
+                    this.lines = lines
+                    isMaxLines = true
+                    break
+                }
+                isNewRow = true
+                curRowWidth = paddingStart
+            }
 
-            // 记录子View位置
-            val childRect = Rect(
-                l, overallHeight, curRowWidth, overallHeight + childView.measuredHeight
-            )
-            childRectCache.put(index, childRect)
+            val itemLeft = if (isNewRow) paddingStart else curRowWidth + horizontalSpace
+            val itemTop = overallHeight
+            val itemRight = itemLeft + childView.measuredWidth
+            val itemBottom = itemTop + childView.measuredHeight
+            val layoutRect = Rect(itemLeft, itemTop, itemRight, itemBottom)
+            childLayoutCache.put(indexedValue.index, layoutRect)
+
+            curRowWidth = itemRight
+            isNewRow = false
             this.lines = lines
         }
 
-        // 记录最后一行
-        maxRowWidth = curRowWidth.coerceAtLeast(maxRowWidth)
-        overallHeight += curRowMaxHeight
+        if (isMaxLines) {
+            overallHeight += paddingBottom
+        } else {
+            // 记录最后一行
+            maxRowWidth = maxRowWidth.coerceAtLeast(curRowWidth + paddingEnd)
+            overallHeight += curRowMaxHeight + paddingBottom
+        }
 
         setMeasuredDimension(
             measureWidth(widthMeasureSpec, maxRowWidth),
@@ -354,8 +353,8 @@ class AnoLabelView : ViewGroup {
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
         for (indexed in children.withIndex()) {
             val i = indexed.index
-            if (i < childRectCache.size()) {
-                val rect = childRectCache[i]
+            if (i < childLayoutCache.size()) {
+                val rect = childLayoutCache[i]
                 getChildAt(i).layout(rect.left, rect.top, rect.right, rect.bottom)
             } else {
                 // 通过改变横向间隔导致最大行数超过限制，多余出来的View可能已经被布局过，
@@ -389,12 +388,11 @@ class AnoLabelView : ViewGroup {
         when (mode) {
             MeasureSpec.EXACTLY -> resultSize = size
             else -> {
-                resultSize = contentWidth + paddingLeft + paddingRight
+                resultSize = contentWidth
                 if (mode == MeasureSpec.AT_MOST)
                     resultSize = resultSize.coerceAtMost(size)
             }
         }
-
         return resultSize.coerceAtLeast(suggestedMinimumWidth)
     }
 
@@ -709,5 +707,5 @@ class AnoLabelView : ViewGroup {
     /**
      * 标签是否全部显示
      */
-    fun isFullDisplay() = childCount == childRectCache.size()
+    fun isFullDisplay() = childCount == childLayoutCache.size()
 }

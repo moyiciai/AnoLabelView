@@ -13,7 +13,7 @@ import cn.moyiciai.lib.AnoLabelView
 
 @SuppressLint("SetTextI18n")
 class MainActivity : AppCompatActivity() {
-    
+
     private val TAG = "MainActivity"
 
     private lateinit var labelView: AnoLabelView
@@ -71,6 +71,7 @@ class MainActivity : AppCompatActivity() {
         val tvVSpace = findViewById<TextView>(R.id.tv_vertical_space)
         val tvTextSize = findViewById<TextView>(R.id.tv_text_size)
         val tvMaxLines = findViewById<TextView>(R.id.tv_max_lines)
+        val tvItemPadding = findViewById<TextView>(R.id.tv_item_padding)
         val tvPadding = findViewById<TextView>(R.id.tv_padding)
 
         findViewById<Button>(R.id.btn_show_checked_size).setOnClickListener {
@@ -121,13 +122,24 @@ class MainActivity : AppCompatActivity() {
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
 
-        findViewById<SeekBar>(R.id.seekBar_padding).setOnSeekBarChangeListener(object :
+        findViewById<SeekBar>(R.id.seekBar_item_padding).setOnSeekBarChangeListener(object :
             SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 labelView.itemPaddingLeft = progress
                 labelView.itemPaddingTop = progress
                 labelView.itemPaddingRight = progress
                 labelView.itemPaddingBottom = progress
+                tvItemPadding.text = "标签内边距（$progress）"
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
+
+        findViewById<SeekBar>(R.id.seekBar_padding).setOnSeekBarChangeListener(object :
+            SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                labelView.setPadding(progress, progress, progress, progress)
                 tvPadding.text = "内边距（$progress）"
             }
 
