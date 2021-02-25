@@ -18,7 +18,7 @@ import androidx.core.view.children
 /**
  * Created by moyiciai on 2020/11/14
  *
- * v1.1.7
+ * v1.1.8
  */
 class AnoLabelView : ViewGroup {
 
@@ -519,7 +519,17 @@ class AnoLabelView : ViewGroup {
      * 切换item选中状态
      */
     private fun toggleViewChecked(view: TextView) {
+        if (view.isSelected.not() && checkedViews.size == maxCheckedCount) {
+            return
+        }
         setItemChecked(view, !view.isSelected)
+    }
+
+    /**
+     * 切换item选中状态
+     */
+    private fun toggleViewChecked(position: Int) {
+        toggleViewChecked(views[position])
     }
 
     /**
@@ -665,9 +675,8 @@ class AnoLabelView : ViewGroup {
      * 根据位置设置选中
      */
     fun setChecked(position: Int) {
-        if (position < 0 || position >= views.size)
-            return
-        views[position].callOnClick()
+        if (position < 0 || position >= views.size) return
+        toggleViewChecked(position)
     }
 
     /**
