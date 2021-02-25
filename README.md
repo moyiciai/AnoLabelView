@@ -5,7 +5,7 @@
 **1.引入依赖：**
 
 ```
-implementation 'cn.moyiciai:ano-labelview:1.1.6'
+implementation 'cn.moyiciai:ano-labelview:1.1.7'
 ```
 
 **2.编写xml布局**
@@ -131,6 +131,9 @@ getCheckedSize(): Int
 
 // 清空所有选中
 clearChecked()
+
+// 设置选中
+setChecked(position: Int)
 
 // 全选
 checkAll()

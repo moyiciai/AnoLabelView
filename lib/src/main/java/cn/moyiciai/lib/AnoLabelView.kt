@@ -18,7 +18,7 @@ import androidx.core.view.children
 /**
  * Created by moyiciai on 2020/11/14
  *
- * v1.1.6
+ * v1.1.7
  */
 class AnoLabelView : ViewGroup {
 
