@@ -662,6 +662,15 @@ class AnoLabelView : ViewGroup {
     }
 
     /**
+     * 根据位置设置选中
+     */
+    fun setChecked(position: Int) {
+        if (position < 0 || position >= views.size)
+            return
+        views[position].callOnClick()
+    }
+
+    /**
      * 是否已达到最大选择数
      */
     fun isCheckedMax(): Boolean = checkedViews.size == maxCheckedCount
