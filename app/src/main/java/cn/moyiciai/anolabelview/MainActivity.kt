@@ -19,6 +19,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var labelView: AnoLabelView
 
     private var count = 20
+    private var nextCheckedPos = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -202,6 +203,10 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.btn_clear_data).setOnClickListener {
             labelView.setData(null)
+        }
+
+        findViewById<Button>(R.id.btn_checked).setOnClickListener {
+            labelView.setChecked(nextCheckedPos++)
         }
     }
 }
