@@ -5,6 +5,7 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
+import android.text.TextUtils
 import android.util.AttributeSet
 import android.util.SparseArray
 import android.util.TypedValue
@@ -18,11 +19,9 @@ import androidx.core.view.children
 /**
  * Created by moyiciai on 2020/11/14
  *
- * v1.1.8
+ * v1.1.9
  */
 class AnoLabelView : ViewGroup {
-
-    private val KEY = R.id.ano_label_view_key
 
     /**
      * 标签间的横向间隔
@@ -157,7 +156,7 @@ class AnoLabelView : ViewGroup {
     /**
      * 记录子控件位置
      */
-    private val childLayoutCache: SparseArray<Array<Int>> = SparseArray()
+    private val childrenLayoutCache: SparseArray<Array<Int>> = SparseArray()
 
     /**
      * 标签选中状态改变时回调
@@ -278,7 +277,7 @@ class AnoLabelView : ViewGroup {
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        childLayoutCache.clear()
+        childrenLayoutCache.clear()
 
         // 记录整体高度
         var overallHeight = paddingTop
@@ -327,7 +326,7 @@ class AnoLabelView : ViewGroup {
             val itemRight = itemLeft + childView.measuredWidth
             val itemBottom = itemTop + childView.measuredHeight
             val layoutCache = arrayOf(itemLeft, itemTop, itemRight, itemBottom)
-            childLayoutCache.put(indexedValue.index, layoutCache)
+            childrenLayoutCache.put(indexedValue.index, layoutCache)
 
             curRowWidth = itemRight
             isNewRow = false
@@ -342,23 +341,18 @@ class AnoLabelView : ViewGroup {
             overallHeight += curRowMaxHeight + paddingBottom
         }
 
+        val measureWidth = measureWidth(widthMeasureSpec, maxRowWidth)
+
         setMeasuredDimension(
-            measureWidth(widthMeasureSpec, maxRowWidth),
+            measureWidth(widthMeasureSpec, measureWidth),
             measureHeight(heightMeasureSpec, overallHeight)
         )
     }
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
-        for (indexed in children.withIndex()) {
-            val i = indexed.index
-            if (i < childLayoutCache.size()) {
-                val layoutCache = childLayoutCache[i]
-                getChildAt(i).layout(layoutCache[0], layoutCache[1], layoutCache[2], layoutCache[3])
-            } else {
-                // 通过改变横向间隔导致最大行数超过限制，多余出来的View可能已经被布局过，
-                // 所以此处要把它们的位置清零
-                getChildAt(i).layout(0, 0, 0, 0)
-            }
+        for (i in 0 until childrenLayoutCache.size()) {
+            val layoutCache = childrenLayoutCache[i]
+            getChildAt(i).layout(layoutCache[0], layoutCache[1], layoutCache[2], layoutCache[3])
         }
     }
 
@@ -384,7 +378,9 @@ class AnoLabelView : ViewGroup {
         var resultSize: Int
 
         when (mode) {
-            MeasureSpec.EXACTLY -> resultSize = size
+            MeasureSpec.EXACTLY -> {
+                resultSize = if (contentWidth < size) contentWidth else size
+            }
             else -> {
                 resultSize = contentWidth
                 if (mode == MeasureSpec.AT_MOST)
@@ -442,7 +438,10 @@ class AnoLabelView : ViewGroup {
     /**
      * 新建子View
      */
-    private fun newChildView(): TextView = TextView(context)
+    private fun newChildView(): TextView = TextView(context).apply {
+        isSingleLine = true
+        ellipsize = TextUtils.TruncateAt.END
+    }
 
     /**
      * 标签点击监听
@@ -587,6 +586,20 @@ class AnoLabelView : ViewGroup {
         }
     }
 
+    /**
+     * TextView 中的文字是否全部显示，
+     * 通过判断是否显示省略号，所以需要设置 ellipsize 属性
+     */
+    private fun isAllTextShowed(tv: TextView): Boolean {
+        tv.ellipsize
+        var ret = false
+        tv.layout?.let { layout ->
+            val lines = layout.lineCount
+            ret = !(lines > 0 && layout.getEllipsisCount(lines - 1) > 0)
+        }
+        return ret
+    }
+
     fun setOnLabelClickListener(listener: (view: TextView, data: Any, position: Int, isChecked: Boolean) -> Unit) {
         onLabelClickListener = listener
     }
@@ -723,5 +736,9 @@ class AnoLabelView : ViewGroup {
     /**
      * 标签是否全部显示
      */
-    fun isFullDisplay() = childCount == childLayoutCache.size()
+    fun isFullDisplay() = childCount == childrenLayoutCache.size()
+
+    companion object {
+        private val KEY = R.id.ano_label_view_key
+    }
 }
