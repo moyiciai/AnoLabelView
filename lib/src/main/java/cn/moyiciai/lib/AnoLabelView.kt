@@ -19,7 +19,7 @@ import androidx.core.view.children
 /**
  * Created by moyiciai on 2020/11/14
  *
- * v1.1.9
+ * v1.1.10
  */
 class AnoLabelView : ViewGroup {
 
@@ -568,6 +568,9 @@ class AnoLabelView : ViewGroup {
         val removedView = views.removeAt(position)
         if (checkedViews.contains(removedView)) {
             checkedViews.remove(removedView)
+            if (checkType == CheckType.SINGLE) {
+                singleCheckedPosition = -1
+            }
         }
         removeViewAt(position)
     }
