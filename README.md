@@ -5,7 +5,7 @@
 **1.引入依赖：**
 
 ```
-implementation 'com.github.moyiciai:AnoLabelView:1.1.10'
+implementation 'com.github.moyiciai:AnoLabelView:1.1.11'
 ```
 
 **2.编写xml布局**
