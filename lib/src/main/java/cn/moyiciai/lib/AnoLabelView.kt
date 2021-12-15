@@ -19,7 +19,7 @@ import androidx.core.view.children
 /**
  * Created by moyiciai on 2020/11/14
  *
- * v1.1.10
+ * v1.1.11
  */
 class AnoLabelView : ViewGroup {
 
@@ -630,6 +630,7 @@ class AnoLabelView : ViewGroup {
         views.clear()
         checkedViews.clear()
         removeAllViews()
+        singleCheckedPosition = -1
     }
 
     /**
